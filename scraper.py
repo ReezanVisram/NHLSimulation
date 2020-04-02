@@ -38,6 +38,8 @@ for i in range(len(teamAndPlayerData['teams'])):
                     teamAndPlayerData['teams'][i]['roster'][j]['stats']['goals'] = currPlayerStats['goals']
                     teamAndPlayerData['teams'][i]['roster'][j]['stats']['assists'] = currPlayerStats['assists']
                     teamAndPlayerData['teams'][i]['roster'][j]['stats']['points'] = currPlayerStats['points']
+                    teamAndPlayerData['teams'][i]['roster'][j]['stats']['plusMinus'] = currPlayerStats['plusMinus']
+                    teamAndPlayerData['teams'][i]['roster'][j]['stats']['timeOnIcePerGame'] = currPlayerStats['timeOnIcePerGame']
 
             except:
                 if (currPlayerStats != -1):
@@ -47,5 +49,6 @@ for i in range(len(teamAndPlayerData['teams'])):
                     teamAndPlayerData['teams'][i]['roster'][j]['stats']['savePercentage'] = currPlayerStats['savePercentage']
                     teamAndPlayerData['teams'][i]['roster'][j]['stats']['goalsAgainstAverage'] = currPlayerStats['goalAgainstAverage']
 
-with open('information.json', 'w') as outputfile:
-    json.dump(teamAndPlayerData, outputfile)
+with open('information.json', 'w') as outputFile:
+    outputFile.truncate(0)
+    json.dump(teamAndPlayerData, outputFile)
