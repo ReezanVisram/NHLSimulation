@@ -1,6 +1,8 @@
 import requests
 import json
 
+print("Starting Scrape...")
+
 allTeams = requests.get('https://statsapi.web.nhl.com/api/v1/teams')
 allTeamsRawJson = allTeams.json()
 
@@ -10,6 +12,8 @@ teamAndPlayerData = {
 
 for i in range(len(teamAndPlayerData['teams'])):
     teamAndPlayerData['teams'][i]['teamName'] = allTeamsRawJson["teams"][i]["name"]
+    teamAndPlayerData['teams'][i]['conference'] = allTeamsRawJson["teams"][i]["conference"]["name"]
+    teamAndPlayerData['teams'][i]['division'] = allTeamsRawJson["teams"][i]["division"]["name"]
     currTeamLink = allTeamsRawJson["teams"][i]["link"]
 
     individualTeam = requests.get('https://statsapi.web.nhl.com/' + currTeamLink + '/roster')
@@ -52,3 +56,5 @@ for i in range(len(teamAndPlayerData['teams'])):
 with open('information.json', 'w') as outputFile:
     outputFile.truncate(0)
     json.dump(teamAndPlayerData, outputFile)
+
+print("Scrape finished successfuly! Find all scraped information in information.json")

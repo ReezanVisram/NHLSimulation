@@ -1,7 +1,9 @@
 class Team:
-    def __init__(self, name, roster):
+    def __init__(self, name, roster, conference, division):
         self.name = name
         self.roster = roster
+        self.conference = conference
+        self.divison = division
 
     def findPlayerByPosition(self, playerList, position):
         for i in playerList:
@@ -120,7 +122,7 @@ class Team:
     def getAllOveralls(self):
         self.getOffenseOverall()
         self.getDefensiveOverall()
-        self.getGoalieOverall
+        self.getGoalieOverall()
 
     def createAllInfo(self):
         self.createLines()
