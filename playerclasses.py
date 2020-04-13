@@ -4,6 +4,7 @@ class Team:
         self.roster = roster
         self.conference = conference
         self.divison = division
+        self.points = 0
 
     def findPlayerByPosition(self, playerList, position):
         for i in playerList:

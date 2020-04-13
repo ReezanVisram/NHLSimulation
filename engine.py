@@ -1,5 +1,7 @@
 import json
 from playerclasses import Team, Player, Goalie
+from gameclasses import Game
+import random
 
 teams = []
 
@@ -131,35 +133,224 @@ for goalie in range(len(goalieRanking)):
 
                 baseOverall = 70
 
+atlanticTeams = []
+metroTeams = []
+centralTeams = []
+pacificTeams = []
+
+
+for team in teams:
+    if (team.division == 'Atlantic'):
+        atlanticTeams.append(team)
+    elif (team.division == 'Metropolitan'):
+        metroTeams.append(team)
+    elif (team.division == 'Central'):
+        centralTeams.append(team)
+    elif (team.division == 'Pacific'):
+        pacificTeams.append(team)
+    else:
+        print(team.name + "'s division is not valid " + team.conference)
 
 for i in teams:
     i.createAllInfo()
-    print(i.name + ":")
 
-    print("Forwards: ")
-    for j in range(len(i.forwardLines)):
-        for x in range(len(i.forwardLines[j])):
-            print(i.forwardLines[j][x].playerName, end = ', ')
-        print()
-    print("The", i.name, "have an Offensive Rating of", i.teamOffensiveOverall)
-    print()
+def createSchedule(atlantic, metro, central, pacific):
+    schedule = [[] for i in range(214)]
+    extraCentralTeams = []
 
-    print("Defensemen: ")
-    for j in range(len(i.defenseLines)):
-        for x in range(len(i.defenseLines[j])):
-            print(i.defenseLines[j][x].playerName, end = ', ')
-        print()
-    print("The", i.name, "have a Defensive Rating of", i.teamDefensiveOverall)
+    for atlanticTeam in atlantic:
+        atlanticCopy = [x for x in atlantic if x != atlanticTeam]
+        gameDays = []
 
-    print()
-    print("Goalies: ")
-    for j in range(len(i.goalieLines)):
-        print(i.goalieLines[j].playerName)
+        for otherAtlanticTeam in atlanticCopy:
+            for games in range(2):
+                day = random.randint(0, len(schedule) - 1)
+                while (day in gameDays):
+                    day = random.randint(0, len(schedule) - 1)
 
-    print("The", i.name, "have a Goalie Rating of", i.teamGoalieOverall)
-        
-    print()
-    print()
+                gameDays.append(day)
+                schedule[day].append(Game(atlanticTeam, otherAtlanticTeam, day, []))
 
+        for metroTeam in metro:
+            for games in range(2):
+                day = random.randint(0, len(schedule) - 1)
+                while (day in gameDays):
+                    day = random.randint(0, len(schedule) - 1)
+
+                gameDays.append(day)
+                schedule[day].append(Game(atlanticTeam, metroTeam, day, []))
+
+        for centralTeam in central:
+            day = random.randint(0, len(schedule) - 1)
+            while (day in gameDays):
+                day = random.randint(0, len(schedule) - 1)
+
+            gameDays.append(day)
+            schedule[day].append(Game(atlanticTeam, centralTeam, day, []))
+
+        for pacificTeam in pacific:
+            day = random.randint(0, len(schedule) - 1)
+            while (day in gameDays):
+                day = random.randint(0, len(schedule) - 1)
+
+            gameDays.append(day)
+            schedule[day].append(Game(atlanticTeam, pacificTeam, day, []))
+
+    for metroTeam in metro:
+        metroCopy = [x for x in metro if x != metroTeam]
+        gameDays = []
+
+        for otherMetroTeam in metroCopy:
+            for games in range(2):
+                day = random.randint(0, len(schedule) - 1)
+
+                while (day in gameDays):
+                    day = random.randint(0, len(schedule) - 1)
+
+                gameDays.append(day)
+                schedule[day].append(Game(metroTeam, otherMetroTeam, day, []))
+
+        for atlanticTeam in atlantic:
+            day = random.randint(0, len(schedule) - 1)
+
+            while (day in gameDays):
+                day = random.randint(0, len(schedule) - 1)
+
+            gameDays.append(day)
+            schedule[day].append(Game(metroTeam, atlanticTeam, day, []))
+
+        for centralTeam in central:
+            day = random.randint(0, len(schedule) - 1)
+
+            while (day in gameDays):
+                day = random.randint(0, len(schedule) - 1)
+
+            gameDays.append(day)
+            schedule[day].append(Game(metroTeam, centralTeam, day, []))
+
+        for pacificTeam in pacific:
+            day = random.randint(0, len(schedule) - 1)
+
+            while (day in gameDays):
+                day = random.randint(0, len(schedule) - 1)
+
+            gameDays.append(day)
+            schedule[day].append(Game(metroTeam, pacificTeam, day, []))
+
+    for centralTeam in central:
+        centralCopy = [x for x in central if x != centralTeam]
+        gameDays = []
+
+        for otherCentralTeam in centralCopy:
+            for games in range(2):
+                day = random.randint(0, len(schedule) - 1)
+
+                while (day in gameDays):
+                    day = random.randint(0, len(schedule) - 1)
+
+                gameDays.append(day)
+                schedule[day].append(Game(centralTeam, otherCentralTeam, day, []))
+
+        for atlanticTeam in atlantic:
+            day = random.randint(0, len(schedule) - 1)
+
+            while (day in gameDays):
+                day = random.randint(0, len(schedule) - 1)
+
+            gameDays.append(day)
+            schedule[day].append(Game(centralTeam, atlanticTeam, day, []))
+
+        for metroTeam in metro:
+            day = random.randint(0, len(schedule) - 1)
+
+            while (day in gameDays):
+                day = random.randint(0, len(schedule) - 1)
+
+            gameDays.append(day)
+            schedule[day].append(Game(centralTeam, metroTeam, day, []))
+
+        for pacificTeam in pacific:
+            for games in range(2):
+                day = random.randint(0, len(schedule) - 1)
+
+                while (day in gameDays):
+                    day = random.randint(0, len(schedule) - 1)
+
+                gameDays.append(day)
+                schedule[day].append(Game(centralTeam, pacificTeam, day, []))
+
+        extraCentralTeam = centralCopy[random.randint(0, len(centralCopy) - 1)]
+
+        day = random.randint(0, len(schedule) - 1)
+
+        while (day in gameDays):
+            day = random.randint(0, len(schedule) - 1)
+
+        while (extraCentralTeam in extraCentralTeams):
+            extraCentralTeam = central[random.randint(0, len(central) - 1)]
+
+        extraCentralTeams.append(extraCentralTeam)
+        gameDays.append(day)
+        schedule[day].append(Game(centralTeam, extraCentralTeam, day, []))
+
+
+
+    for pacificTeam in pacific:
+        pacificCopy = [x for x in pacific if x != pacificTeam]
+        gameDays = []
+
+        for otherPacificTeam in pacificCopy:
+            for games in range(2):
+                day = random.randint(0, len(schedule) - 1)
+
+                while (day in gameDays):
+                    day = random.randint(0, len(schedule) - 1)
+
+                gameDays.append(day)
+                schedule[day].append(Game(pacificTeam, otherPacificTeam, day, []))
+
+        for atlanticTeam in atlantic:
+            day = random.randint(0, len(schedule) - 1)
+
+            while (day in gameDays):
+                day = random.randint(0, len(schedule) - 1)
+
+            gameDays.append(day)
+            schedule[day].append(Game(pacificTeam, atlanticTeam, day, []))
+
+        for metroTeam in metro:
+            day = random.randint(0, len(schedule) - 1)
+
+            while (day in gameDays):
+                day = random.randint(0, len(schedule) - 1)
+
+            gameDays.append(day)
+            schedule[day].append(Game(pacificTeam, metroTeam, day, []))
+
+        for centralTeam in central:
+            day = random.randint(0, len(schedule) - 1)
+
+            while (day in gameDays):
+                day = random.randint(0, len(schedule) - 1)
+
+            gameDays.append(day)
+            schedule[day].append(Game(pacificTeam, centralTeam, day, []))
+
+    return schedule
+
+seasonSchedule = createSchedule(atlanticTeams, metroTeams, centralTeams, pacificTeams)
+
+for i in range(len(seasonSchedule)):
+    for j in range(len(seasonSchedule[i])):
+        seasonSchedule[i][j].determineWinner()
+
+        for team in teams:
+            if (team == seasonSchedule[i][j].winner):
+                team.points += 2
+
+teams.sort(key=lambda x: x.points, reverse=True)
+
+for i in teams:
+    print("The", i.name, "finished the season with", i.points, 'points')
 
 
