@@ -293,8 +293,6 @@ def createSchedule(atlantic, metro, central, pacific):
         gameDays.append(day)
         schedule[day].append(Game(centralTeam, extraCentralTeam, day, []))
 
-
-
     for pacificTeam in pacific:
         pacificCopy = [x for x in pacific if x != pacificTeam]
         gameDays = []
@@ -342,7 +340,7 @@ seasonSchedule = createSchedule(atlanticTeams, metroTeams, centralTeams, pacific
 
 for i in range(len(seasonSchedule)):
     for j in range(len(seasonSchedule[i])):
-        seasonSchedule[i][j].determineWinner()
+        seasonSchedule[i][j].simulateGame()
 
         for team in teams:
             if (team == seasonSchedule[i][j].winner):

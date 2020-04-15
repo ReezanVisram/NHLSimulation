@@ -6,6 +6,7 @@ class Team:
         self.divison = division
         self.points = 0
 
+
     def findPlayerByPosition(self, playerList, position):
         for i in playerList:
             if (i.position == position):
@@ -70,6 +71,8 @@ class Team:
 
             currLineAverage = currLineOverall / 3
             lineAverageOveralls.append(currLineAverage)
+
+        self.forwardLineOveralls = lineAverageOveralls
 
         for overall in range(len(lineAverageOveralls)):
             if (overall == 0):
