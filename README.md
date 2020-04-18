@@ -22,4 +22,4 @@ This will create the information.json file required for the engine to get all of
 
 More information about the scraper can be found [here].
 
-2. Run the engine.py file, which for now will get all the information, create objects for all the players and teams, determine the overalls for all the players, which are used to create the best possible Forward, Defense, and Goalie lines, as well as to determine an overall rating for each component of a team.
+2. Run the engine.py file, which will create and simulate every single game of the season, output every single team's place at the end of the season, generate the playoff bracket and simulate each playoff series, and crown the eventual Stanley Cup Champion!
