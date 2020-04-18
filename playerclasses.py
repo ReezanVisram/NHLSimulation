@@ -5,7 +5,10 @@ class Team:
         self.conference = conference
         self.divison = division
         self.points = 0
-
+        self.round1Wins = 0
+        self.round2Wins = 0
+        self.round3Wins = 0
+        self.round4Wins = 0
 
     def findPlayerByPosition(self, playerList, position):
         for i in playerList:
@@ -47,6 +50,8 @@ class Team:
                 self.forwards.remove(player)
 
         self.forwards.sort(key=lambda x: x.overall, reverse=True)
+
+        self.forwardsCopy = self.forwards.copy()
 
         for i in range(len(self.forwardLines)):
             for j in range(3):
@@ -101,6 +106,8 @@ class Team:
             currLineAverage = currLineOverall / 2
             lineAverageOveralls.append(currLineAverage)
         
+        self.defenseLineOveralls = lineAverageOveralls
+
         for overall in range(len(lineAverageOveralls)):
             if (overall == 0):
                 self.teamDefensiveOverall += (lineAverageOveralls[overall] * 0.4)
