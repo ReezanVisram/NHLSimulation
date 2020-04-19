@@ -9,14 +9,8 @@ atlanticTeams = []
 metroTeams = []
 centralTeams = []
 pacificTeams = []
-
 easternPlayoffTeams = []
 westernPlayoffTeams = []
-
-# These lists start with -1 so that the first actual index in them is '1' to make determining the player's overalls easier
-forwardRanking = [-1]
-defenseRanking = [-1]
-goalieRanking = [-1]
 
 # The 'data' parameter refers to the information gotten from 'information.json' on lines 249-256 
 def getTeamNames(data):
@@ -248,6 +242,155 @@ def createSchedule(atlantic, metro, central, pacific):
 
     return schedule
 
+def getForwards(players):
+    forwards = []
+    for player in players:
+        if (player.position == 'LW') or (player.position == 'C') or (player.position == 'RW'):
+            forwards.append(player)
+
+    return forwards
+
+def getDefensemen(players):
+    defensemen = []
+    for player in players:
+        if (player.position == 'D'):
+            defensemen.append(player)
+
+    return defensemen
+
+def getGoalies(players):
+    goalies = []
+    for player in players:
+        if (player.position == 'G'):
+            goalies.append(player)
+
+    return goalies
+
+def rankForwards(forwards):
+    forwardRankings = [-1]
+
+    for team in teams:
+        for forward in forwards:
+            currPlayerPPG = (forward.points / forward.gamesPlayed)
+            forwardRankings.append(currPlayerPPG)
+
+    forwardRankings.sort()
+    forwardRankings = list(dict.fromkeys(forwardRankings))
+
+    return forwardRankings
+
+def rankDefensemen(defensemen):
+    defenseRankings = [-1]
+
+
+    for defenseman in defensemen:
+        currPlayerNormalizedPlusMinus = (defenseman.plusMinus / defenseman.gamesPlayed)
+        currPlayerPPG = (defenseman.points / defenseman.gamesPlayed)
+
+        defenseRankings.append(currPlayerNormalizedPlusMinus + currPlayerPPG)
+
+    defenseRankings.sort()
+    defenseRankings = list(dict.fromkeys(defenseRankings))
+
+    return defenseRankings
+
+def rankGoalies(goalies):
+    goalieRankings = [-1]
+
+    for goalie in goalies:
+        currGoalieAdjustedSV = (goalie.savePercentage / goalie.goalsAgainstAverage)
+
+        currGoalieWinPct = (goalie.wins / goalie.gamesPlayed)
+
+        goalieRankings.append(currGoalieAdjustedSV + currGoalieWinPct)
+
+    goalieRankings.sort()
+    goalieRankings = list(dict.fromkeys(goalieRankings))
+
+    return goalieRankings
+
+def determineForwardOveralls(forwards, forwardRankings):
+    baseOverall = 70
+    for rank in range(len(forwardRankings)):
+        for forward in forwards:
+            currForwardValue = (forward.points / forward.gamesPlayed)
+            if (currForwardValue == forwardRankings[rank]):
+                nearestMultipleOf14 = 14 * round(rank / 14)
+                baseOverall += nearestMultipleOf14 / 14
+
+                forward.overall = baseOverall
+
+                baseOverall = 70
+
+def determineDefenseOveralls(defensemen, defenseRankings):
+    baseOverall = 70
+
+    for rank in range(len(defenseRankings)):
+        for defenseman in defensemen:
+            currDefenseValue = (defenseman.plusMinus / defenseman.gamesPlayed) + (defenseman.points / defenseman.gamesPlayed)
+            if (currDefenseValue == defenseRankings[rank]):
+                nearestMultipleOf10 = 10 * round(rank / 10)
+                baseOverall += nearestMultipleOf10 / 10
+
+                defenseman.overall = baseOverall
+
+                baseOverall = 70
+
+def determineGoalieOveralls(goalies, goalieRankings):
+    baseOverall = 70
+
+    for rank in range(len(goalieRankings)):
+        for goalie in goalies:
+            currGoalieValue = (goalie.savePercentage / goalie.goalsAgainstAverage) + (goalie.wins / goalie.gamesPlayed)
+
+            if (currGoalieValue == goalieRankings[rank]):
+                nearestMultipleOf3 = 3 * round(rank / 3)
+                baseOverall += nearestMultipleOf3 / 3
+
+                goalie.overall = baseOverall
+
+                baseOverall = 70
+
+def simulateRegularSeason(schedule):
+    for day in range(len(schedule)):
+        for game in range(len(schedule[day])):
+            schedule[day][game].simulateGame()
+
+            schedule[day][game].winner.points += 2
+
+            if (schedule[day][game].wasOvertime):
+                schedule[day][game].loser.points += 2
+
+def determineStandings(teams, atlantic, metro, central, pacific, eastern, western):
+    teams.sort(key=lambda x: x.points, reverse=True)
+
+    atlantic.sort(key=lambda x: x.points, reverse=True)
+    metro.sort(key=lambda x: x.points, reverse=True)
+    central.sort(key=lambda x: x.points, reverse=True)
+    pacific.sort(key=lambda x: x.points, reverse=True)
+
+    eastern.sort(key=lambda x: x.points, reverse=True)
+    western.sort(key=lambda x: x.points, reverse=True)
+
+def getPlayoffTeams(atlantic, metro, central, pacific, eastern, western):
+    global easternPlayoffTeams, westernPlayoffTeams
+    for playoffTeam in range(3):
+        easternPlayoffTeams.append(atlantic[playoffTeam])
+        easternPlayoffTeams.append(metro[playoffTeam])
+
+        westernPlayoffTeams.append(central[playoffTeam])
+        westernPlayoffTeams.append(pacific[playoffTeam])
+
+    for wildcard in range(2):
+        for easternTeam in eastern:
+            if easternTeam not in easternPlayoffTeams:
+                easternPlayoffTeams.append(easternTeam)
+                break
+
+        for westernTeam in western:
+            if westernTeam not in westernPlayoffTeams:
+                westernPlayoffTeams.append(westernTeam)
+                break
 # Creates all of the actual lists of teams and players
 with open('information.json') as inputFile:
     data = json.load(inputFile)
@@ -256,82 +399,24 @@ with open('information.json') as inputFile:
     teamDivisions = getTeamDivisions(data)
     playersList = getPlayersList(teamNames, data)
 
+forwards = getForwards(playersList)
+defensemen = getDefensemen(playersList)
+goalies = getGoalies(playersList)
 
 for i in teamNames:
     teams.append(getTeamRoster(i))
 
-# The loop that dtermines the ranking of every player in the league
-for i in range(len(teams)):
-    teams[i].conference = teamConferences[i]
-    teams[i].division = teamDivisions[i]
-    for j in range(len(teams[i].roster)):
-        if (teams[i].roster[j].position != 'G'):
-            if (teams[i].roster[j].position != 'D'):
-                currPlayerPPG = (teams[i].roster[j].points / teams[i].roster[j].gamesPlayed)
-                forwardRanking.append(currPlayerPPG)
-            else:
-                currPlayerNormalizedPlusMinus = (teams[i].roster[j].plusMinus / teams[i].roster[j].gamesPlayed)
-                currPlayerPPG = (teams[i].roster[j].points / teams[i].roster[j].gamesPlayed)
+for team in range(len(teams)):
+    teams[team].conference = teamConferences[team]
+    teams[team].division = teamDivisions[team]
 
-                defenseRanking.append(currPlayerNormalizedPlusMinus + currPlayerPPG)
-        else:
-            currGoalieAdjustedSV = (teams[i].roster[j].savePercentage / teams[i].roster[j].goalsAgainstAverage)
+forwardRankings = rankForwards(forwards)
+defenseRankings = rankDefensemen(defensemen)
+goalieRankings = rankGoalies(goalies)
 
-            currGoalieWinPct = (teams[i].roster[j].wins / teams[i].roster[j].gamesPlayed)
-    
-            goalieRanking.append(currGoalieAdjustedSV + currGoalieWinPct)
-
-# Removes duplicates to improve performance (no sense iterating over elements that are the same)
-forwardRanking.sort()
-defenseRanking.sort()
-goalieRanking.sort()
-
-forwardRanking = list(dict.fromkeys(forwardRanking))
-defenseRanking = list(dict.fromkeys(defenseRanking))
-goalieRanking = list(dict.fromkeys(goalieRanking))
-
-
-# MAY MAKE SENSE TO SEPARATE THE NEXT THREE LOOPS INTO THEIR OWN FUNCTIONS LATER
-
-# Determines the overall for all the Forwards in the League 
-baseOverall = 70
-for ppg in range(len(forwardRanking)):
-    for player in playersList:
-        if (player.position != 'G') and (player.position != 'D'):
-            if ((player.points / player.gamesPlayed) == forwardRanking[ppg]):
-                nearestMultipleOf14 = 14 * round(ppg / 14)
-                baseOverall += nearestMultipleOf14 / 14
-
-                player.overall = baseOverall
-
-                baseOverall = 70
-
-# Determines the overall for all the Defensemen in the League 
-for defense in range(len(defenseRanking)):
-    for player in playersList:
-        if (player.position == 'D'):
-            currPlayerRanking = (player.plusMinus / player.gamesPlayed) + (player.points / player.gamesPlayed)
-            if (currPlayerRanking == defenseRanking[defense]):
-                nearestMultipleOf10 = 10 * round(defense / 10)
-                baseOverall += nearestMultipleOf10 / 10
-
-                player.overall = baseOverall
-
-                baseOverall = 70
-
-# Determines the overall for all the Goalies in the League 
-for goalie in range(len(goalieRanking)):
-    for player in playersList:
-        if (player.position == 'G'):
-            currGoalieRankingValue = (player.savePercentage / player.goalsAgainstAverage) + (player.wins / player.gamesPlayed)
-
-            if (currGoalieRankingValue == goalieRanking[goalie]):
-                nearestMultipleOf3 = 3 * round(goalie / 3)
-                baseOverall += nearestMultipleOf3 / 3
-
-                player.overall = baseOverall
-
-                baseOverall = 70
+determineForwardOveralls(forwards, forwardRankings)
+determineDefenseOveralls(defensemen, defenseRankings)
+determineGoalieOveralls(goalies, goalieRankings)
 
 # Determines what division every team is in to later create the schedule with the above createSchedule function
 for team in teams:
@@ -356,44 +441,13 @@ for i in teams:
 seasonSchedule = createSchedule(atlanticTeams, metroTeams, centralTeams, pacificTeams)
 
 # The actual simulation of the regular season, using methods defined in the Game class
-for i in range(len(seasonSchedule)):
-    for j in range(len(seasonSchedule[i])):
-        seasonSchedule[i][j].simulateGame()
-
-        seasonSchedule[i][j].winner.points += 2
-
-        if (seasonSchedule[i][j].wasOvertime):
-            seasonSchedule[i][j].loser.points += 1
+simulateRegularSeason(seasonSchedule)
 
 # Ranks the entire league and each division to create the playoffs
-teams.sort(key=lambda x: x.points, reverse=True)
-
-atlanticTeams.sort(key=lambda x: x.points, reverse=True)
-metroTeams.sort(key=lambda x: x.points, reverse=True)
-centralTeams.sort(key=lambda x: x.points, reverse=True)
-pacificTeams.sort(key=lambda x: x.points, reverse=True)
-
-easternTeams.sort(key=lambda x: x.points, reverse=True)
-westernTeams.sort(key=lambda x: x.points, reverse=True)
+determineStandings(teams, atlanticTeams, metroTeams, centralTeams, pacificTeams, easternTeams, westernTeams)
 
 # Determines which teams are in the playoffs
-for playoffTeam in range(3):
-    easternPlayoffTeams.append(atlanticTeams[playoffTeam])
-    easternPlayoffTeams.append(metroTeams[playoffTeam])
-
-    westernPlayoffTeams.append(centralTeams[playoffTeam])
-    westernPlayoffTeams.append(pacificTeams[playoffTeam])
-
-for wildcard in range(2):
-    for easternTeam in easternTeams:
-        if easternTeam not in easternPlayoffTeams:
-            easternPlayoffTeams.append(easternTeam)
-            break
-
-    for westernTeam in westernTeams:
-        if westernTeam not in westernPlayoffTeams:
-            westernPlayoffTeams.append(westernTeam)
-            break
+getPlayoffTeams(atlanticTeams, metroTeams, centralTeams, pacificTeams, easternTeams, westernTeams)
 
 print("Atlantic Division: ")
 for atlanticTeam in atlanticTeams:
@@ -422,6 +476,9 @@ westernRound1Winners = []
 
 easternRound2Winners = []
 westernRound2Winners = []
+
+easternChampion = None
+westernChampion = None
 
 def generateRound1(atlantic, metro, central, pacific, eastern, western):
     # Pairs are made manually for now
@@ -458,6 +515,22 @@ def generateRound1(atlantic, metro, central, pacific, eastern, western):
 
     return round1
 
+def simulateRound1(round1):
+    global easternRound1Winners, westernRound1Winners
+    for series in round1:
+        series.simulateSeries()
+
+        print(series.seriesWinner.name, "beat the", series.seriesLoser.name, "in their first round matchup. The series went", series.gamesPlayed, "games")
+        
+        if (series.seriesWinner.conference == "Eastern"):
+            easternRound1Winners.append(series.seriesWinner)
+
+        else:
+            westernRound1Winners.append(series.seriesWinner)
+
+    print()
+    print()
+
 def generateRound2(eastern, western):
     pairs = []
     round2 = []
@@ -484,6 +557,22 @@ def generateRound2(eastern, western):
 
     return round2
 
+def simulateRound2(round2):
+    global easternRound2Winners, westernRound2Winners
+    for series in round2:
+        series.simulateSeries()
+
+        print(series.seriesWinner.name, "beat the", series.seriesLoser.name, "in their second round matchup. The series went", series.gamesPlayed, "games")
+
+        if (series.seriesWinner.conference == 'Eastern'):
+            easternRound2Winners.append(series.seriesWinner)
+
+        else:
+            westernRound2Winners.append(series.seriesWinner)
+
+    print()
+    print()
+
 def generateRound3(eastern, western):
     gameDay = 0
     easternFinals = []
@@ -506,6 +595,19 @@ def generateRound3(eastern, western):
 
     return round3
 
+def simulateRound3(round3):
+    global easternChampion, westernChampion
+    for series in round3:
+        series.simulateSeries()
+
+        print(series.seriesWinner.name, "beat the", series.seriesLoser.name, "in their third round matchup. The series went", series.gamesPlayed, "games")
+
+        if (series.seriesWinner.conference == 'Eastern'):
+            easternChampion = series.seriesWinner
+
+        else:
+            westernChampion = series.seriesWinner
+
 def generateStanleyCupFinals(eastern, western):
     gameDay = 0
     seriesSchedule = []
@@ -518,55 +620,27 @@ def generateStanleyCupFinals(eastern, western):
     cupFinals.append(Series(seriesSchedule))
 
     return cupFinals
-    
+
+def simulateStanleyCupFinals(stanleyCupFinals):
+    for series in stanleyCupFinals:
+        series.simulateSeries()
+
+    return series.seriesWinner
+
+
 # Simulates the first round using methods defined in the PlayoffGame class and the Series class
-round1 = generateRound1(atlanticTeams, metroTeams, centralTeams, pacificTeams, easternPlayoffTeams, westernPlayoffTeams)
-for series in round1:
-    series.simulateSeries()
+simulateRound1(generateRound1(atlanticTeams, metroTeams, centralTeams, pacificTeams, easternPlayoffTeams, westernPlayoffTeams))
 
-    print(series.seriesWinner.name, "beat the", series.seriesLoser.name, "in their first round matchup. The series went", series.gamesPlayed, "games")
-    
-    if (series.seriesWinner.conference == "Eastern"):
-        easternRound1Winners.append(series.seriesWinner)
-
-    else:
-        westernRound1Winners.append(series.seriesWinner)
-
-print()
-print()
 
 # Simulates the second round
-round2 = generateRound2(easternRound1Winners, westernRound1Winners)
-for series in round2:
-    series.simulateSeries()
+simulateRound2(generateRound2(easternRound1Winners, westernRound1Winners))
 
-    print(series.seriesWinner.name, "beat the", series.seriesLoser.name, "in their second round matchup. The series went", series.gamesPlayed, "games")
-
-    if (series.seriesWinner.conference == 'Eastern'):
-        easternRound2Winners.append(series.seriesWinner)
-
-    else:
-        westernRound2Winners.append(series.seriesWinner)
-
-print()
-print()
 
 # Simulates each Conference Final
-round3 = generateRound3(easternRound2Winners, westernRound2Winners)
-for series in round3:
-    series.simulateSeries()
-
-    print(series.seriesWinner.name, "beat the", series.seriesLoser.name, "in their third round matchup. The series went", series.gamesPlayed, "games")
-
-    if (series.seriesWinner.conference == 'Eastern'):
-        easternChampion = series.seriesWinner
-
-    else:
-        westernChampion = series.seriesWinner
+simulateRound3(generateRound3(easternRound2Winners, westernRound2Winners))
 
 # Simulates the Stanley Cup Finals
-stanleyCupFinals = generateStanleyCupFinals(easternChampion, westernChampion)
-for series in stanleyCupFinals:
-    series.simulateSeries()
+stanleyCupChampion = simulateStanleyCupFinals(generateStanleyCupFinals(easternChampion, westernChampion))
 
-    print("Your 2020-2021 Stanley Cup Champions are the", series.seriesWinner.name)
+print("Your 2020-21 Stanley Cup Champions are the {}!".format(stanleyCupChampion.name))
+
