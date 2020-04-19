@@ -1,14 +1,14 @@
 class Team:
-    def __init__(self, name, roster, conference, division):
+    def __init__(self, name, roster, conference, division, points=0, round1Wins=0, round2Wins=0, round3Wins=0, round4Wins=0):
         self.name = name
         self.roster = roster
         self.conference = conference
         self.divison = division
-        self.points = 0
-        self.round1Wins = 0
-        self.round2Wins = 0
-        self.round3Wins = 0
-        self.round4Wins = 0
+        self.points = points
+        self.round1Wins = round1Wins
+        self.round2Wins = round2Wins
+        self.round3Wins = round3Wins
+        self.round4Wins = round4Wins
 
     def findPlayerByPosition(self, playerList, position):
         for i in playerList:
@@ -17,6 +17,7 @@ class Team:
 
         return playerList[0]
 
+    # All overalls are created in engine.py before these methods run
     def createGoalieLines(self):
         self.goalieLines = ['G', 'G']
 

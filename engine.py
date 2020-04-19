@@ -3,15 +3,22 @@ import random
 from playerclasses import Team, Player, Goalie
 from gameclasses import Game, PlayoffGame, Series
 
-
+# These lists are defined at the top following the style of my codebase, but are not used until far later.
 teams = []
+atlanticTeams = []
+metroTeams = []
+centralTeams = []
+pacificTeams = []
 
-forwardPointsPerGame = [-1]
+easternPlayoffTeams = []
+westernPlayoffTeams = []
 
+# These lists start with -1 so that the first actual index in them is '1' to make determining the player's overalls easier
+forwardRanking = [-1]
 defenseRanking = [-1]
-
 goalieRanking = [-1]
 
+# The 'data' parameter refers to the information gotten from 'information.json' on lines 249-256 
 def getTeamNames(data):
     teamNames = []
     for team in data['teams']:
@@ -35,6 +42,7 @@ def getTeamDivisions(data):
 
     return teamDivisions
 
+# This creats the entire list of all of the players, which are then separated by team
 def getPlayersList(teamNames, data):
     playersList = []
     for x in range(len(data['teams'])):
@@ -57,6 +65,7 @@ def getTeamRoster(currTeamName):
 
     return currTeamObject
 
+# There may be a way to do this by removing teams from their respective lists, which could be useful for creating home and away games later.
 def createSchedule(atlantic, metro, central, pacific):
     schedule = [[] for i in range(214)]
     extraCentralTeams = []
@@ -239,9 +248,9 @@ def createSchedule(atlantic, metro, central, pacific):
 
     return schedule
 
+# Creates all of the actual lists of teams and players
 with open('information.json') as inputFile:
     data = json.load(inputFile)
-
     teamNames = getTeamNames(data)
     teamConferences = getTeamConferences(data)
     teamDivisions = getTeamDivisions(data)
@@ -251,6 +260,7 @@ with open('information.json') as inputFile:
 for i in teamNames:
     teams.append(getTeamRoster(i))
 
+# The loop that dtermines the ranking of every player in the league
 for i in range(len(teams)):
     teams[i].conference = teamConferences[i]
     teams[i].division = teamDivisions[i]
@@ -258,7 +268,7 @@ for i in range(len(teams)):
         if (teams[i].roster[j].position != 'G'):
             if (teams[i].roster[j].position != 'D'):
                 currPlayerPPG = (teams[i].roster[j].points / teams[i].roster[j].gamesPlayed)
-                forwardPointsPerGame.append(currPlayerPPG)
+                forwardRanking.append(currPlayerPPG)
             else:
                 currPlayerNormalizedPlusMinus = (teams[i].roster[j].plusMinus / teams[i].roster[j].gamesPlayed)
                 currPlayerPPG = (teams[i].roster[j].points / teams[i].roster[j].gamesPlayed)
@@ -271,19 +281,24 @@ for i in range(len(teams)):
     
             goalieRanking.append(currGoalieAdjustedSV + currGoalieWinPct)
 
-forwardPointsPerGame.sort()
+# Removes duplicates to improve performance (no sense iterating over elements that are the same)
+forwardRanking.sort()
 defenseRanking.sort()
 goalieRanking.sort()
 
-forwardPointsPerGame = list(dict.fromkeys(forwardPointsPerGame))
+forwardRanking = list(dict.fromkeys(forwardRanking))
 defenseRanking = list(dict.fromkeys(defenseRanking))
 goalieRanking = list(dict.fromkeys(goalieRanking))
 
+
+# MAY MAKE SENSE TO SEPARATE THE NEXT THREE LOOPS INTO THEIR OWN FUNCTIONS LATER
+
+# Determines the overall for all the Forwards in the League 
 baseOverall = 70
-for ppg in range(len(forwardPointsPerGame)):
+for ppg in range(len(forwardRanking)):
     for player in playersList:
         if (player.position != 'G') and (player.position != 'D'):
-            if ((player.points / player.gamesPlayed) == forwardPointsPerGame[ppg]):
+            if ((player.points / player.gamesPlayed) == forwardRanking[ppg]):
                 nearestMultipleOf14 = 14 * round(ppg / 14)
                 baseOverall += nearestMultipleOf14 / 14
 
@@ -291,6 +306,7 @@ for ppg in range(len(forwardPointsPerGame)):
 
                 baseOverall = 70
 
+# Determines the overall for all the Defensemen in the League 
 for defense in range(len(defenseRanking)):
     for player in playersList:
         if (player.position == 'D'):
@@ -303,6 +319,7 @@ for defense in range(len(defenseRanking)):
 
                 baseOverall = 70
 
+# Determines the overall for all the Goalies in the League 
 for goalie in range(len(goalieRanking)):
     for player in playersList:
         if (player.position == 'G'):
@@ -316,12 +333,7 @@ for goalie in range(len(goalieRanking)):
 
                 baseOverall = 70
 
-atlanticTeams = []
-metroTeams = []
-centralTeams = []
-pacificTeams = []
-
-
+# Determines what division every team is in to later create the schedule with the above createSchedule function
 for team in teams:
     if (team.division == 'Atlantic'):
         atlanticTeams.append(team)
@@ -337,11 +349,13 @@ for team in teams:
 easternTeams = atlanticTeams + metroTeams
 westernTeams = centralTeams + pacificTeams
 
+# Uses the method defined in the Team class
 for i in teams:
     i.createAllInfo()
 
 seasonSchedule = createSchedule(atlanticTeams, metroTeams, centralTeams, pacificTeams)
 
+# The actual simulation of the regular season, using methods defined in the Game class
 for i in range(len(seasonSchedule)):
     for j in range(len(seasonSchedule[i])):
         seasonSchedule[i][j].simulateGame()
@@ -351,6 +365,7 @@ for i in range(len(seasonSchedule)):
         if (seasonSchedule[i][j].wasOvertime):
             seasonSchedule[i][j].loser.points += 1
 
+# Ranks the entire league and each division to create the playoffs
 teams.sort(key=lambda x: x.points, reverse=True)
 
 atlanticTeams.sort(key=lambda x: x.points, reverse=True)
@@ -361,9 +376,7 @@ pacificTeams.sort(key=lambda x: x.points, reverse=True)
 easternTeams.sort(key=lambda x: x.points, reverse=True)
 westernTeams.sort(key=lambda x: x.points, reverse=True)
 
-easternPlayoffTeams = []
-westernPlayoffTeams = []
-
+# Determines which teams are in the playoffs
 for playoffTeam in range(3):
     easternPlayoffTeams.append(atlanticTeams[playoffTeam])
     easternPlayoffTeams.append(metroTeams[playoffTeam])
@@ -403,18 +416,7 @@ for pacificTeam in pacificTeams:
 print()
 print()
 
-print("Eastern Conference Playoff Teams: ")
-for easternPlayoffTeam in easternPlayoffTeams:
-    print(easternPlayoffTeam.name)
-print()
-
-print("Western Conference Playoff Teams: ")
-for westernPlayoffTeam in westernPlayoffTeams:
-    print(westernPlayoffTeam.name)
-
-print()
-print()
-
+# Initializes empty lists down here because it makes more sense here
 easternRound1Winners = []
 westernRound1Winners = []
 
@@ -422,6 +424,7 @@ easternRound2Winners = []
 westernRound2Winners = []
 
 def generateRound1(atlantic, metro, central, pacific, eastern, western):
+    # Pairs are made manually for now
     pairs = []
     currPair = [eastern[0], eastern[7]]
     pairs.append(currPair)
@@ -516,8 +519,8 @@ def generateStanleyCupFinals(eastern, western):
 
     return cupFinals
     
+# Simulates the first round using methods defined in the PlayoffGame class and the Series class
 round1 = generateRound1(atlanticTeams, metroTeams, centralTeams, pacificTeams, easternPlayoffTeams, westernPlayoffTeams)
-
 for series in round1:
     series.simulateSeries()
 
@@ -532,8 +535,8 @@ for series in round1:
 print()
 print()
 
+# Simulates the second round
 round2 = generateRound2(easternRound1Winners, westernRound1Winners)
-
 for series in round2:
     series.simulateSeries()
 
@@ -548,8 +551,8 @@ for series in round2:
 print()
 print()
 
+# Simulates each Conference Final
 round3 = generateRound3(easternRound2Winners, westernRound2Winners)
-
 for series in round3:
     series.simulateSeries()
 
@@ -561,8 +564,8 @@ for series in round3:
     else:
         westernChampion = series.seriesWinner
 
+# Simulates the Stanley Cup Finals
 stanleyCupFinals = generateStanleyCupFinals(easternChampion, westernChampion)
-
 for series in stanleyCupFinals:
     series.simulateSeries()
 

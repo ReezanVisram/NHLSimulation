@@ -1,16 +1,15 @@
 import random
 class Game:
-    def __init__(self, team1, team2, day):
+    def __init__(self, team1, team2, day, team1Score=0, team2Score=0, wasOvertime=False):
         self.team1 = team1
         self.team2 = team2
         self.day = day
-        self.team1Score = 0
-        self.team2Score = 0
-        self.wasOvertime = False
+        self.team1Score = team1Score
+        self.team2Score = team2Score
+        self.wasOvertime = wasOvertime
     
-
     def simulateGame(self):
-        for period in range(3):
+        for period in range(3): 
             self.simulatePeriod()
 
         if (self.team1Score > self.team2Score):
@@ -51,7 +50,7 @@ class Game:
 
     def simulatePeriod(self):
         for minute in range(20):
-            if (minute % 3 == 0):
+            if (minute % 3 == 0): # Arbitrarily chose 3 minutes as the length of a shift
                 self.lineChange()
             goal = self.determineGoal()
             if (goal == self.team1):
@@ -92,6 +91,7 @@ class Game:
         else:
             return False
 
+    # Line changes are completely random for now, will change to include matchups and situational changes, as well as Special Teams
     def determineCurrTeamForwardLine(self):
         currLineChance = random.randint(1, 10)
 
@@ -119,7 +119,6 @@ class Game:
         else:
             return 2
 
-
     def lineChange(self):
         self.team1ForwardLineNumber = self.determineCurrTeamForwardLine()
         self.team2ForwardLineNumber = self.determineCurrTeamForwardLine()
@@ -139,6 +138,7 @@ class Game:
         self.team1DefenseLineOverall = self.team1.defenseLineOveralls[self.team1DefenseLineNumber]
         self.team2DefenseLineOverall = self.team2.defenseLineOveralls[self.team2DefenseLineNumber]
 
+    # More functionality to be added to determine who scored and when (Foundations already in)
     def determineGoal(self):
         if (self.team1ForwardLineOverall > self.team2ForwardLineOverall):
             higherTeam = self.team1
@@ -176,6 +176,7 @@ class Game:
                 if (getsPastGoalie):
                     return higherTeam
 
+# Extends Game class
 class PlayoffGame(Game):
     def simulateGame(self):
         for period in range(3):
@@ -201,7 +202,7 @@ class PlayoffGame(Game):
                     
                 else:
                     self.winner = self.team1 if random.randint(0, 1) == 0 else self.team2
-        
+
 class Series:
     def __init__(self, games, team1Wins=0, team2Wins=0):
         self.games = games
