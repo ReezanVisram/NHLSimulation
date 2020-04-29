@@ -1,14 +1,18 @@
 class Team:
-    def __init__(self, name, roster, conference, division, points=0, round1Wins=0, round2Wins=0, round3Wins=0, round4Wins=0):
+    def __init__(self, name, roster, conference, division):
         self.name = name
         self.roster = roster
         self.conference = conference
         self.divison = division
-        self.points = points
-        self.round1Wins = round1Wins
-        self.round2Wins = round2Wins
-        self.round3Wins = round3Wins
-        self.round4Wins = round4Wins
+        self.points = 0
+        self.round1Wins = 0
+        self.round2Wins = 0
+        self.round3Wins = 0
+        self.round4Wins = 0
+        self.wins = 0
+        self.losses = 0
+        self.overtimeLosses = 0
+        self.gameDays = []
 
     def findPlayerByPosition(self, playerList, position):
         for i in playerList:
@@ -44,11 +48,7 @@ class Team:
     def createForwardLines(self):
         self.forwardLines = [['LW', 'C', 'RW'], ['LW', 'C', 'RW'], ['LW', 'C', 'RW'], ['LW', 'C', 'RW']]
 
-        self.forwards = [player for player in self.roster if player.position != 'D']
-
-        for player in self.forwards:
-            if (player.position == 'G'):
-                self.forwards.remove(player)
+        self.forwards = [player for player in self.roster if player.position != 'D' and player.position != 'G']
 
         self.forwards.sort(key=lambda x: x.overall, reverse=True)
 
@@ -142,7 +142,7 @@ class Team:
 
 
 class Player:
-    def __init__(self, teamName, playerName, position, gamesPlayed, goals, assists, points, plusMinus, timeOnIcePerGame, overall):
+    def __init__(self, teamName, playerName, position, gamesPlayed, goals, assists, points, plusMinus, timeOnIcePerGame, overall=0, currSeasonGamesPlayed=0, currSeasonGoals=0, currSeasonAssists=0, currSeasonPoints=0):
         self.teamName = teamName
         self.playerName = playerName
         self.position = position
@@ -152,10 +152,13 @@ class Player:
         self.points = points
         self.plusMinus = plusMinus
         self.timeOnIcePerGame = int(timeOnIcePerGame[0] + timeOnIcePerGame[1])
-        self.overall = 0
+        self.currSeasonGoals = currSeasonGoals
+        self.currSeasonAssists = currSeasonAssists
+        self.currSeasonPoints = currSeasonPoints
+        self.currSeasonGamesPlayed = currSeasonGamesPlayed
 
 class Goalie:
-    def __init__(self, teamName, playerName, position, gamesPlayed, wins, losses, savePercentage, goalsAgainstAverage, overall):
+    def __init__(self, teamName, playerName, position, gamesPlayed, wins, losses, savePercentage, goalsAgainstAverage, overall, currSeasonGamesPlayed=0, currSeasonWins=0, currSeasonSavePercentage=0, currSeasonGoalsAgainstAverage=0):
         self.teamName = teamName
         self.playerName = playerName
         self.position = position
@@ -165,5 +168,9 @@ class Goalie:
         self.savePercentage = savePercentage
         self.goalsAgainstAverage = goalsAgainstAverage
         self.overall = 0
+        self.currSeasonGamesPlayed = currSeasonGamesPlayed
+        self.currSeasonWins = currSeasonWins
+        self.currSeasonSavePercentage = currSeasonSavePercentage
+        self.currSeasonGoalsAgainstAverage = currSeasonGoalsAgainstAverage
 
    

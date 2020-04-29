@@ -1,4 +1,5 @@
 import random
+from time import sleep
 class Game:
     def __init__(self, team1, team2, day, team1Score=0, team2Score=0, wasOvertime=False):
         self.team1 = team1
@@ -19,27 +20,43 @@ class Game:
             self.winner = self.team2
 
         else:
+            self.wasOvertime = True
             self.simulateOvertime()
 
             if (self.team1Score > self.team2Score):
                 self.winner = self.team1
-                self.wasOvertime = True
             
             elif (self.team1Score < self.team2Score):
                 self.winner = self.team2
-                self.wasOvertime = True
 
             else:
                 threeRoundWinner = self.simulateShootout()
 
                 if (threeRoundWinner):
                     self.winner = self.team1 if self.team1Shootout > self.team2Shootout else self.team2
+                    
+                    if (self.winner == self.team1):
+                        self.team1Score += 1
+                    
+                    else:
+                        self.team2Score += 1
 
                 else:
                     self.winner = self.team1 if random.randint(0, 1) == 0 else  self.team2
+          
+                    if (self.winner == self.team1):
+                        self.team1Score += 1
+                    
+                    else:
+                        self.team2Score += 1
 
-        if (self.wasOvertime):
-            self.determineLoser()
+        self.determineLoser()
+
+        for player in self.team1.roster:
+            player.currSeasonGamesPlayed += 1
+
+        for player in self.team2.roster:
+            player.currSeasonGamesPlayed += 1
 
     def determineLoser(self):
         if (self.winner == self.team1):
@@ -174,6 +191,19 @@ class Game:
                 getsPastGoalie = True if random.uniform(0, lowerTeam.goalieLines[0].overall) > lowerTeam.goalieLines[0].overall * 0.6 else False
 
                 if (getsPastGoalie):
+                    if (random.randint(0, 10) >= 8):
+                        if (higherTeam == self.team1):
+                            self.team1ActualDefenseLine[random.randint(0, 1)].currSeasonGoals += 1
+
+                        else:
+                            self.team2ActualDefenseLine[random.randint(0, 1)].currSeasonGoals += 1
+
+                    else:
+                        if (higherTeam == self.team1):
+                            self.team1ActualForwardLine[random.randint(0, 2)].currSeasonGoals += 1
+                        
+                        else:
+                            self.team2ActualForwardLine[random.randint(0, 2)].currSeasonGoals += 1
                     return higherTeam
 
 # Extends Game class
