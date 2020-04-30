@@ -10,6 +10,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
+from kivy.uix.image import Image
 from kivy.uix.gridlayout import GridLayout
 from kivy.clock import mainthread, Clock
 from kivy.graphics import *
@@ -89,8 +90,6 @@ def createSchedule(atlantic, metro, central, pacific):
                 atlanticTeam.gameDays.append(day)
                 otherAtlanticTeam.gameDays.append(day)
                 schedule[day].append(Game(atlanticTeam, otherAtlanticTeam, day))
-
-        print("Finished {} Vs. all other Atlantic teams".format(atlanticTeam.name))
 
         for metroTeam in metro:
             for games in range(2):
@@ -682,6 +681,9 @@ class MainMenuScreen(Screen):
 class AboutScreen(Screen):
     pass
 
+class AdditionalInformationScreen(Screen):
+    pass
+
 class TeamHomeScreen(Screen):
     @mainthread
     def on_enter(self):
@@ -699,7 +701,7 @@ class TeamHomeScreen(Screen):
         self.day = 0
         self.weekHasChanged = False
 
-        self.simulationIsStopped = False
+        self.simulationIsStopped = True
 
     def on_leave(self):
         global currWeek, simScreenWasSwitched, dayStopped, gameStopped
@@ -709,9 +711,9 @@ class TeamHomeScreen(Screen):
         dayStopped = self.day
         gameStopped = self.game
 
-    def goToLines(self):
+    def goToAdditionalInformation(self):
         if (self.simulationIsStopped):
-            self.manager.current = 'CurrentTeamForwardLineScreen'
+            self.manager.current = 'AdditionalInformationScreen'
 
         else:
             print("Stop the simulation first please")
@@ -754,10 +756,6 @@ class TeamHomeScreen(Screen):
                 seasonSchedule[self.day][self.game].loser.overtimeLosses += 1
 
             self.updateRecord()
-            
-            if (seasonSchedule[self.day][self.game].team1.name == currTeam or seasonSchedule[self.day][self.game].team2.name == currTeam):
-                gameString = '{} {}-{} {}'.format(seasonSchedule[self.day][self.game].team1.name, seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2.name, seasonSchedule[self.day][self.game].team2Score)
-                self.ids.LatestGameResult.text = gameString
 
             if (self.day % 7 == 0):
                 self.ids.MainCalendar.ids.Sunday.ids.CalendarLogo.source = 'imgs/gray.png'
@@ -980,7 +978,6 @@ class TeamHomeScreen(Screen):
             print("Regular season finished!")
             finishedRegularSeason = True
 
-
 class ChooseTeamScreen(Screen):
     def __init__(self, **kwargs):
         super(ChooseTeamScreen, self).__init__(**kwargs)
@@ -990,12 +987,6 @@ class ChooseTeamScreen(Screen):
         global currTeam
         currTeam = instance.text
         self.manager.current = 'TeamHomeScreen'
-
-    @mainthread
-    def on_enter(self):
-        for i in teamNames:
-            button = Button(text=i, on_press=self.getCurrTeam)
-            self.ids.grid.add_widget(button)
 
 class CurrentTeamForwardLineScreen(Screen):
     def getCurrPlayer(self, instance):
@@ -1176,6 +1167,99 @@ class CurrentPlayerInfoScreen(Screen):
 
         else:
             self.currSeason = 0
+
+class LeagueStandingsScreen(Screen):
+    @mainthread
+    def on_enter(self):
+        self.conferences = ["Eastern", "Western"]
+
+        for team in teams:
+            if (team.name == currTeam):
+                self.currConference = self.conferences.index(team.conference)
+                break
+    
+        self.populateConference()
+
+    def populateConference(self):
+        global atlanticTeams, metroTeams
+        self.ids.CurrConference.text = '{} Conference'.format(self.conferences[self.currConference])
+
+        divOneTop3String  = ''
+        divTwoTop3String = ''
+        remainingConferenceString = ''
+
+        divOneTop3 = []
+        divTwoTop3 = []
+        conferenceTeamsRemaining = []
+
+        if (self.currConference == 0):
+            self.ids.DivOne.text = "Atlantic Division"
+            self.ids.DivTwo.text = "Metropolitan Division"
+
+            atlanticTeams.sort(key=lambda x: x.points, reverse=True)
+            metroTeams.sort(key=lambda x: x.points, reverse=True)
+            easternTeams.sort(key=lambda x: x.points, reverse=True)
+
+            for team in range(3):
+                divOneTop3.append(atlanticTeams[team])
+                divTwoTop3.append(metroTeams[team])
+
+            for team in easternTeams:
+                if (team in divOneTop3 or team in divTwoTop3):
+                    pass
+
+                else:
+                    conferenceTeamsRemaining.append(team)
+
+            for atlanticTeam in range(len(divOneTop3)):
+                divOneTop3String += ('{}. {} - {} points\n'.format(atlanticTeam + 1, divOneTop3[atlanticTeam].name, divOneTop3[atlanticTeam].points))
+
+            for metroTeam in range(len(divTwoTop3)):
+                divTwoTop3String += ('{}. {} - {} points\n'.format(metroTeam + 1, divTwoTop3[metroTeam].name, divTwoTop3[metroTeam].points))
+
+            for easternTeam in range(len(conferenceTeamsRemaining)):
+                remainingConferenceString +=('{}. {} - {} points\n\n'.format(easternTeam + 1, conferenceTeamsRemaining[easternTeam].name, conferenceTeamsRemaining[easternTeam].points))
+
+        else:
+            self.ids.DivOne.text = "Central Division"
+            self.ids.DivTwo.text = "Pacific Division"
+
+            centralTeams.sort(key=lambda x: x.points, reverse=True)
+            pacificTeams.sort(key=lambda x: x.points, reverse=True)
+            westernTeams.sort(key=lambda x: x.points, reverse=True)
+
+            for team in range(3):
+                divOneTop3.append(centralTeams[team])
+                divTwoTop3.append(pacificTeams[team])
+
+            for team in westernTeams:
+                if (team in divOneTop3 or team in divTwoTop3):
+                    pass
+
+                else:
+                    conferenceTeamsRemaining.append(team)
+
+            for centralTeam in range(len(divOneTop3)):
+                divOneTop3String += ('{}. {} - {} points\n'.format(centralTeam + 1, divOneTop3[centralTeam].name, divOneTop3[centralTeam].points))
+
+            for pacificTeam in range(len(divTwoTop3)):
+                divTwoTop3String += ('{}. {} - {} points\n'.format(pacificTeam + 1, divTwoTop3[pacificTeam].name, divTwoTop3[pacificTeam].points))
+
+            for westernTeam in range(len(conferenceTeamsRemaining)):
+                remainingConferenceString +=('{}. {} - {} points\n\n'.format(westernTeam + 1, conferenceTeamsRemaining[westernTeam].name, conferenceTeamsRemaining[westernTeam].points))
+
+        self.ids.DivOneTopThree.text = divOneTop3String
+        self.ids.DivTwoTopThree.text = divTwoTop3String
+        self.ids.RestOfConferenceTeams.text = remainingConferenceString
+
+    def changeConference(self):
+        if (self.currConference == 0):
+            self.currConference = 1
+
+        else:
+            self.currConference = 0
+
+        self.populateConference()
 
 class NHLSimulationApp(App):
     def build(self):

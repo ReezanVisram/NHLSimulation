@@ -1,6 +1,5 @@
 #:kivy 1.10.0
 
-
 <OneWeek>:
     GridLayout:
         size_hint: 1, 0.2
@@ -96,6 +95,10 @@
 
     CurrentPlayerInfoScreen:
 
+    AdditionalInformationScreen:
+
+    LeagueStandingsScreen:
+
 <MainMenuScreen>:
     name: "MainMenuScreen"
 
@@ -172,12 +175,419 @@
         Label:
             text: "Choose which team to follow"
             font_size: 40
-            pos_hint: {"x": 0.025, "y": 0.4}
+            pos_hint: {"x": 0.025, "y": 0.45}
             color: [0, 0, 0, 1]
 
     GridLayout:
         id: grid
-        cols: 1
+        pos_hint: {"x": 0.05}
+        size_hint: 0.9, 0.9
+        rows: 7
+        cols: 5
+
+        Button:
+            text: 'Anaheim Ducks'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Anaheim Ducks.png'
+                size: self.size
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        
+        Button:
+            text: 'Arizona Coyotes'
+            on_press: root.getCurrTeam(self)
+            font_size: 0
+
+            Image:
+                source: 'imgs/Arizona Coyotes.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Boston Bruins'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Boston Bruins.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        
+        Button:
+            text: 'Buffalo Sabres'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Buffalo Sabres.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        
+        Button:
+            text: 'Calgary Flames'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Calgary Flames.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Carolina Hurricanes'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Carolina Hurricanes.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Chicago Blackhawks'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Chicago Blackhawks.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        
+        Button:
+            text: 'Colorado Avalanche'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Colorado Avalanche.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Columbus Blue Jackets'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Columbus Blue Jackets.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Dallas Stars'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Dallas Stars.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        
+        Button:
+            text: 'Detroit Red Wings'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Detroit Red Wings.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Edmonton Oilers'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Edmonton Oilers.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Florida Panthers'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Florida Panthers.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        
+        Button:
+            text: 'Los Angeles Kings'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Los Angeles Kings.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Minnesota Wild'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Minnesota Wild.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Montreal Canadiens'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Montreal Canadiens.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        
+        Button:
+            text: 'Nashville Predators'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Nashville Predators.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'New Jersey Devils'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/New Jersey Devils.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'New York Islanders'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/New York Islanders.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        
+        Button:
+            text: 'New York Rangers'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/New York Rangers.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Ottawa Senators'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Ottawa Senators.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Philadelphia Flyers'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Philadelphia Flyers.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        
+        Button:
+            text: 'Pittsburgh Penguins'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Pittsburgh Penguins.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        Button:
+            text: 'San Jose Sharks'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/San Jose Sharks.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'St. Louis Blues'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/St. Louis Blues.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        
+        Button:
+            text: 'Tampa Bay Lightning'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Tampa Bay Lightning.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Toronto Maple Leafs'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Toronto Maple Leafs.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Vancouver Canucks'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Vancouver Canucks.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+        
+        Button:
+            text: 'Vegas Golden Knights'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Vegas Golden Knights.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Washington Capitals'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Washington Capitals.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+        Button:
+            text: 'Winnipeg Jets'
+            on_press: root.getCurrTeam(self)
+
+            font_size: 0
+
+            Image:
+                source: 'imgs/Winnipeg Jets.png'
+                width: self.parent.width
+                height: self.parent.height
+                x: self.parent.x
+                y: self.parent.y + self.parent.height - 75
+
+
 
 <TeamHomeScreen>:
     name: "TeamHomeScreen"
@@ -215,10 +625,10 @@
             pos_hint: {"top": 0.98}
 
         Button:
-            text: "View Lines"
+            text: "Additional Information"
             size_hint: 0.3, 0.1
             pos_hint: {"x": 0.01, "top": 0.7}
-            on_press: root.goToLines()
+            on_press: root.goToAdditionalInformation()
 
         Button:
             id: StartSim
@@ -560,3 +970,152 @@
         color: [0, 0, 0, 1]
         font_size: 50
 
+<AdditionalInformationScreen>:
+    name: "AdditionalInformationScreen"
+
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Button:
+            text: "View Lines"
+            on_press: root.manager.current = 'CurrentTeamForwardLineScreen'
+            pos_hint: {"x": 0.01, "top": 0.8}
+            size_hint: 0.3, 0.1
+
+        Button:
+            text: "League Standings"
+            pos_hint: {"x": 0.01, "top": 0.7}
+            size_hint: 0.3, 0.1
+            on_press: root.manager.current = 'LeagueStandingsScreen'
+
+        Button:
+            text: "Back to Dashboard"
+            pos_hint: {"x": 0.7}
+            size_hint: 0.3, 0.1
+            on_press: root.manager.current = 'TeamHomeScreen'
+
+        Label: 
+            text: "Additional Information"
+            color: [0, 0, 0, 1]
+            font_size: 40
+            pos_hint: {"y": 0.45}
+
+<LeagueStandingsScreen>:
+    name: "LeagueStandingsScreen"
+
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            id: CurrConference
+            text: "Current Conference"
+            color: [0, 0, 0, 1]
+            font_size: 40
+            pos_hint: {"y": 0.45}
+
+        Label:
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 1
+
+                Line:
+                    width: 3
+                    rectangle: self.x, self.y, self.width, self.height
+
+            size_hint: 0.4, 0.1
+            id: DivOne
+            text: "Division 1"
+            color: [0, 0, 0, 1]
+            font_size: 30
+
+            pos_hint: {"x": 0.05, "top": 0.85}
+
+        Label:
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 1
+
+                Line:
+                    width: 1
+                    rectangle: self.x, self.y, self.width, self.height
+
+            size_hint: 0.4, 0.2
+            id: DivOneTopThree
+            text: "1. Team1\n2.Team2\n3.Team3"
+            color: [0, 0, 0, 1]
+            font_size: 20
+
+            pos_hint: {"x": 0.05, "top": 0.75}
+
+        Label:
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 1
+
+                Line:
+                    width: 3
+                    rectangle: self.x, self.y, self.width, self.height
+
+            size_hint: 0.4, 0.1
+            pos_hint: {"x": 0.05, "top": 0.5}
+            id: DivTwo
+            text: "Division2"
+            color: [0, 0, 0, 1]
+            font_size: 30
+
+        Label:
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 1
+
+                Line:
+                    width: 1
+                    rectangle: self.x, self.y, self.width, self.height
+
+            size_hint: 0.4, 0.2
+            id: DivTwoTopThree
+            text: "1. Team1\n2.Team2\n3.Team3"
+            color: [0, 0, 0, 1]
+            font_size: 20
+
+            pos_hint: {"x": 0.05, "top": 0.4}
+
+        Label:
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 1
+
+                Line:
+                    width: 1
+                    rectangle: self.x, self.y, self.width, self.height
+
+            id: RestOfConferenceTeams
+            text: "1. Team1\n2. Team2\n3. Team3\n 4. Team4\n5. Team5\n6. Team6\n7. Team7\n8. Team8\n9. Team9\n10. Team10\n11. Team11" 
+            size_hint: 0.45, 0.9
+
+            color: [0, 0, 0, 1]
+            font_size: 20
+
+            pos_hint: {"x": 0.5, "top": 0.85}
+
+        Button:
+            text: "Back to Dashboard"
+            on_press: root.manager.current = 'TeamHomeScreen'
+            size_hint: 0.2, 0.1
+    
+        Button:
+            text: "Change Conference"
+            on_press: root.changeConference()
+
+            size_hint: 0.2, 0.1
+            pos_hint: {"top": 1}

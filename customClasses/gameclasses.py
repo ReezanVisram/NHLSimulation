@@ -51,6 +51,12 @@ class Game:
                         self.team2Score += 1
 
         self.determineLoser()
+        self.winner.points += 2
+
+        if (self.wasOvertime):
+            self.loser.points += 1
+
+
 
         for player in self.team1.roster:
             player.currSeasonGamesPlayed += 1

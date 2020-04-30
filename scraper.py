@@ -11,7 +11,11 @@ teamAndPlayerData = {
 }
 
 for i in range(len(teamAndPlayerData['teams'])):
-    teamAndPlayerData['teams'][i]['teamName'] = allTeamsRawJson["teams"][i]["name"]
+    if ('Canadiens' in allTeamsRawJson["teams"][i]["name"]):
+        teamAndPlayerData['teams'][i]['teamName'] = 'Montreal Canadiens'
+    else:
+        teamAndPlayerData['teams'][i]['teamName'] = allTeamsRawJson["teams"][i]["name"]
+        
     teamAndPlayerData['teams'][i]['conference'] = allTeamsRawJson["teams"][i]["conference"]["name"]
     teamAndPlayerData['teams'][i]['division'] = allTeamsRawJson["teams"][i]["division"]["name"]
     currTeamLink = allTeamsRawJson["teams"][i]["link"]
