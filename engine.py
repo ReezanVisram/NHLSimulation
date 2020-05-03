@@ -74,7 +74,7 @@ def getTeamRoster(currTeamName):
 
 # There may be a way to do this by removing teams from their respective lists, which could be useful for creating home and away games later.
 def createSchedule(atlantic, metro, central, pacific):
-    schedule = [[] for i in range(214)]
+    schedule = [[] for i in range(224)]
     extraCentralTeams = []
     gameDays = []
 
@@ -491,37 +491,37 @@ def generateRound1(atlantic, metro, central, pacific, eastern, western):
     pacific.sort(key=lambda x: x.points, reverse=True)
     eastern.sort(key=lambda x: x.points, reverse=True)
     western.sort(key=lambda x: x.points, reverse=True)
+
     # Pairs are made manually for now
     pairs = []
-    currPair = [eastern[0], eastern[7]]
+    currPair = [atlantic[0], eastern[7]]
     pairs.append(currPair)
     currPair = [atlantic[1], atlantic[2]]
     pairs.append(currPair)
-    currPair = [eastern[1], eastern[6]]
+    currPair = [metro[0], eastern[6]]
     pairs.append(currPair)
     currPair = [metro[1], metro[2]]
     pairs.append(currPair)
 
-    currPair = [western[0], western[7]]
+    currPair = [central[0], western[7]]
     pairs.append(currPair)
     currPair = [pacific[1], pacific[2]]
     pairs.append(currPair)
-    currPair = [western[1], western[6]]
+    currPair = [pacific[0], western[6]]
     pairs.append(currPair)
     currPair = [central[1], central[2]]
     pairs.append(currPair)
 
-    round1 = []
+    round1 = [[] for i in range(16)]
 
     for pair in pairs:
-        seriesSchedule = []
+        pair[0].wins = 0
+        pair[1].wins = 0
         gameDay = random.randint(0, 1)
 
         for day in range(7):
-            seriesSchedule.append(PlayoffGame(pair[0], pair[1], gameDay))
+            round1[gameDay].append(PlayoffGame(pair[0], pair[1], gameDay))
             gameDay += 2
-
-        round1.append(Series(seriesSchedule))
 
     return round1
 
@@ -647,19 +647,23 @@ gameStopped = 0
 finishedRegularSeason = False
 
 round1 = None
-round1Generated = False
+generatedRound1 = False
+populatedRound1 = False
 finishedRound1 = False
 
 round2 = None
-round2Generated = False
+generatedRound2 = False
+populatedRound2 = False
 finishedRound2 = False
 
 round3 = None
-round3Generated = False
+generatedRound3 = False
+populatedRound3 = False
 finishedRound3 = False
 
 round4 = None
-round4Generated = False
+generatedRound4 = False
+populatedRound4 = False
 finishedRound4 = False
 
 seasonSchedule = createSchedule(atlanticTeams, metroTeams, centralTeams, pacificTeams)
@@ -690,18 +694,40 @@ class TeamHomeScreen(Screen):
         self.ids.TeamHomeScreenTitle.text = currTeam
         self.ids.TeamHomeScreenLogo.source = str('imgs/' + currTeam + '.png')
         
+        self.calendarComponentsList = [
+            self.ids.MainCalendar.ids.Sunday,
+            self.ids.MainCalendar.ids.Monday,
+            self.ids.MainCalendar.ids.Tuesday,
+            self.ids.MainCalendar.ids.Wednesday,
+            self.ids.MainCalendar.ids.Thursday,
+            self.ids.MainCalendar.ids.Friday,
+            self.ids.MainCalendar.ids.Saturday
+        ]
+
+        self.weeklyImagesList = [
+            'imgs/white.png',
+            'imgs/white.png',
+            'imgs/white.png',
+            'imgs/white.png',
+            'imgs/white.png',
+            'imgs/white.png',
+            'imgs/white.png',
+            'imgs/white.png'
+        ]
+
+
+        self.simSpeed = 0.2
+        self.game = gameStopped
+        self.day = dayStopped
+        self.weekHasChanged = False
+        self.simulationIsStopped = True
+        self.currWeek = currWeek
+
         self.separateIntoWeeks(seasonSchedule)
         self.updateRecord()
 
-        self.currWeek = currWeek
-
-        self.populateWeek(self.currWeek)
-
-        self.game = 0
-        self.day = 0
-        self.weekHasChanged = False
-
-        self.simulationIsStopped = True
+        if (not finishedRegularSeason):
+            self.populateWeek(self.currWeek)
 
     def on_leave(self):
         global currWeek, simScreenWasSwitched, dayStopped, gameStopped
@@ -723,7 +749,7 @@ class TeamHomeScreen(Screen):
         
     def runSimulation(self):
         self.simulationIsStopped = False
-        Clock.schedule_interval(self.simulate, 0.2)
+        Clock.schedule_interval(self.simulate, self.simSpeed)
         
     def updateRecord(self):
         for team in teams:
@@ -737,108 +763,54 @@ class TeamHomeScreen(Screen):
         self.ids.CurrTeamRecord.text = recordString
 
     def simulate(self, dt):
-        global finishedRegularSeason, round1, round1Generated, finishedRound1, round2, round2Generated, finishedRound2, round3, round3Generated, finishedRound3, round4, round4Generated, finishedRound4
+        global weeks, simScreenWasSwitched, finishedRegularSeason, dayStopped, gameStopped, seasonSchedule
         if (not self.simulationIsStopped) and (not finishedRegularSeason):
-            global simScreenWasSwitched, dayStopped, gameStopped, seasonSchedule
-
             if (simScreenWasSwitched):
                 self.day = dayStopped
                 self.game = gameStopped
                 simScreenWasSwitched = False
 
-            seasonSchedule[self.day][self.game].simulateGame()
+            currGame = seasonSchedule[self.day][self.game]
 
-            seasonSchedule[self.day][self.game].winner.wins += 1
-            if (not seasonSchedule[self.day][self.game].wasOvertime):
-                seasonSchedule[self.day][self.game].loser.losses += 1
+            print(self.day)
+
+            currGame.simulateGame()
+            if (currGame.winner.name == currTeam or currGame.loser.name == currTeam):
+                self.ids.LatestGameResult.text = 'The {} beat The {}'.format(currGame.winner.name, currGame.loser.name)
+
+            currGame.winner.wins += 1
+
+            if (not currGame.wasOvertime):
+                currGame.loser.losses += 1
 
             else:
-                seasonSchedule[self.day][self.game].loser.overtimeLosses += 1
+                currGame.loser.overtimeLosses += 1
 
             self.updateRecord()
 
-            if (self.day % 7 == 0):
-                self.ids.MainCalendar.ids.Sunday.ids.CalendarLogo.source = 'imgs/gray.png'
+            self.calendarComponentsList[self.day % 7].ids.CalendarLogo.source = 'imgs/gray.png'
 
-            elif (self.day % 7 == 1):
-                self.ids.MainCalendar.ids.Monday.ids.CalendarLogo.source = 'imgs/gray.png'
+            if (currGame.team1.name == currTeam or currGame.team2.name == currTeam):
+                if (currGame.winner.name == currTeam):
+                    self.calendarComponentsList[self.day % 7].ids.GameScore.text = 'W \n {} - {}'.format(currGame.team1Score, currGame.team2Score)
+
+                elif (currGame.loser.name == currTeam):
+                    self.calendarComponentsList[self.day % 7].ids.GameScore.text = 'L \n {} - {}'.format(currGame.team1Score, currGame.team2Score)
             
-            elif (self.day % 7 == 2):
-                self.ids.MainCalendar.ids.Tuesday.ids.CalendarLogo.source = 'imgs/gray.png'
-
-            elif (self.day % 7 == 3):
-                self.ids.MainCalendar.ids.Wednesday.ids.CalendarLogo.source = 'imgs/gray.png'
-
-            elif (self.day % 7 == 4):
-                self.ids.MainCalendar.ids.Thursday.ids.CalendarLogo.source = 'imgs/gray.png'
-            
-            elif (self.day % 7 == 5):
-                self.ids.MainCalendar.ids.Friday.ids.CalendarLogo.source = 'imgs/gray.png'
-
-            elif (self.day % 7 == 6):
-                self.ids.MainCalendar.ids.Saturday.ids.CalendarLogo.source = 'imgs/gray.png'
-
-            if (seasonSchedule[self.day][self.game].team1.name == currTeam or seasonSchedule[self.day][self.game].team2.name == currTeam):
-                if (self.day % 7 == 0):
-                    if (seasonSchedule[self.day][self.game].winner.name == currTeam):
-                        self.ids.MainCalendar.ids.Sunday.ids.GameScore.text = 'W \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-                
-                    else:
-                        self.ids.MainCalendar.ids.Sunday.ids.GameScore.text = 'L \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-
-                elif (self.day % 7 == 1):
-                    if (seasonSchedule[self.day][self.game].winner.name == currTeam):
-                        self.ids.MainCalendar.ids.Monday.ids.GameScore.text = 'W \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-                
-                    else:
-                        self.ids.MainCalendar.ids.Monday.ids.GameScore.text = 'L \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-
-                elif (self.day % 7 == 2):
-                    if (seasonSchedule[self.day][self.game].winner.name == currTeam):
-                        self.ids.MainCalendar.ids.Tuesday.ids.GameScore.text = 'W \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-                
-                    else:
-                        self.ids.MainCalendar.ids.Tuesday.ids.GameScore.text = 'L \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-
-                elif (self.day % 7 == 3):
-                    if (seasonSchedule[self.day][self.game].winner.name == currTeam):
-                        self.ids.MainCalendar.ids.Wednesday.ids.GameScore.text = 'W \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-                
-                    else:
-                        self.ids.MainCalendar.ids.Wednesday.ids.GameScore.text = 'L \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-
-                elif (self.day % 7 == 4):
-                    if (seasonSchedule[self.day][self.game].winner.name == currTeam):
-                        self.ids.MainCalendar.ids.Thursday.ids.GameScore.text = 'W \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-                
-                    else:
-                        self.ids.MainCalendar.ids.Thursday.ids.GameScore.text = 'L \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-
-                elif (self.day % 7 == 5):
-                    if (seasonSchedule[self.day][self.game].winner.name == currTeam):
-                        self.ids.MainCalendar.ids.Friday.ids.GameScore.text = 'W \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-                
-                    else:
-                        self.ids.MainCalendar.ids.Friday.ids.GameScore.text = 'L \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-
-                elif (self.day % 7 == 6):
-                    if (seasonSchedule[self.day][self.game].winner.name == currTeam):
-                        self.ids.MainCalendar.ids.Saturday.ids.GameScore.text = 'W \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-                
-                    else:
-                        self.ids.MainCalendar.ids.Saturday.ids.GameScore.text = 'L \n {} - {}'.format(seasonSchedule[self.day][self.game].team1Score, seasonSchedule[self.day][self.game].team2Score)
-
-
             if (self.game < len(seasonSchedule[self.day]) - 1):
                 self.game += 1
             
             else:
                 if (self.day % 7 == 6):
                     self.currWeek += 1
-                    self.populateWeek(self.currWeek)
+                    if (self.currWeek < len(weeks)):
+                        self.populateWeek(self.currWeek)
 
                 self.game = 0
                 self.day += 1
+
+        else:
+            finishedRegularSeason = True
 
     def separateIntoWeeks(self, stageToSeparate):
         global weeks, seasonSchedule, finishedRegularSeason
@@ -851,132 +823,35 @@ class TeamHomeScreen(Screen):
                 weeks.append(currWeek)
                 currWeek = []
 
-            if (day >= len(stageToSeparate)):
-                finishedRegularSeason = True
-
     def populateWeek(self, currWeek):
         global weeks, finishedRegularSeason
 
-        self.sundayImg = 'imgs/white.png'
-        self.mondayImg = 'imgs/white.png'
-        self.tuesdayImg = 'imgs/white.png'
-        self.wednesdayImg = 'imgs/white.png'
-        self.thursdayImg = 'imgs/white.png'
-        self.fridayImg = 'imgs/white.png'
-        self.saturdayImg = 'imgs/white.png'
+        for dailyImage in range(len(self.weeklyImagesList)):
+            self.weeklyImagesList[dailyImage]= 'imgs/white.png'
 
-        self.ids.MainCalendar.ids.Sunday.ids.GameScore.text = ''
-        self.ids.MainCalendar.ids.Monday.ids.GameScore.text = ''
-        self.ids.MainCalendar.ids.Tuesday.ids.GameScore.text = ''
-        self.ids.MainCalendar.ids.Wednesday.ids.GameScore.text = ''
-        self.ids.MainCalendar.ids.Thursday.ids.GameScore.text = ''
-        self.ids.MainCalendar.ids.Friday.ids.GameScore.text = ''
-        self.ids.MainCalendar.ids.Saturday.ids.GameScore.text = ''
+        for dailyCalendarComponent in self.calendarComponentsList:
+            dailyCalendarComponent.ids.GameScore.text = ''
 
-        try:
-            for day in range(len(weeks[currWeek])):
-                for game in range(len(weeks[currWeek][day])):
-                        if (currWeek == 0):
-                            if (weeks[currWeek][day][game].team1.name == currTeam):
-                                if (day % 7 == 0):
-                                    self.sundayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
+        for day in range(len(weeks[currWeek])):
+            for game in range(len(weeks[currWeek][day])):
+                currGame = weeks[currWeek][day][game]
+                if (currWeek == 0):
+                    if (currGame.team1.name == currTeam):
+                        self.weeklyImagesList[day] = str('imgs/' + currGame.team2.name + '.png')
 
-                                elif (day % 7 == 1):
-                                    self.mondayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
+                    elif (currGame.team2.name == currTeam):
+                        self.weeklyImagesList[day] = str('imgs/' + currGame.team1.name + '.png')
 
-                                elif (day % 7 == 2):
-                                    self.tuesdayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
+                else:
+                    if (day < len(self.weeklyImagesList) - 1):
+                        if (currGame.team1.name == currTeam):
+                            self.weeklyImagesList[day + 1] = str('imgs/' + currGame.team2.name + '.png')
 
-                                elif (day % 7 == 3):
-                                    self.wednesdayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')    
-
-                                elif (day % 7 == 4):
-                                    self.thursdayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
-
-                                elif (day % 7 == 5):
-                                    self.fridayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
-
-                                elif (day % 7 == 6):
-                                    self.saturdayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
-
-                            elif (weeks[currWeek][day][game].team2.name == currTeam):
-                                if (day % 7 == 0):
-                                    self.sundayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')
-
-                                elif (day % 7 == 1):
-                                    self.mondayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')
-
-                                elif (day % 7 == 2):
-                                    self.tuesdayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')
-
-                                elif (day % 7 == 3):
-                                    self.wednesdayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')
-
-                                elif (day % 7 == 4):
-                                    self.thursdayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')
-
-                                elif (day % 7 == 5):
-                                    self.fridayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')    
-
-                                elif (day % 7 == 6):
-                                    self.saturdayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')    
-
-                        else:
-                            if (weeks[currWeek][day][game].team1.name == currTeam):
-                                if (day + 1 % 7 == 0):
-                                    self.sundayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
-
-                                elif (day + 1 % 7 == 1):
-                                    self.mondayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
-
-                                elif (day + 1 % 7 == 2):
-                                    self.tuesdayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
-
-                                elif (day + 1 % 7 == 3):
-                                    self.wednesdayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')    
-
-                                elif (day + 1 % 7 == 4):
-                                    self.thursdayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
-
-                                elif (day + 1 % 7 == 5):
-                                    self.fridayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
-
-                                elif (day + 1 % 7 == 6):
-                                    self.saturdayImg = str('imgs/' + weeks[currWeek][day][game].team2.name + '.png')
-
-                            elif (weeks[currWeek][day][game].team2.name == currTeam):
-                                if (day + 1 % 7 == 0):
-                                    self.sundayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')
-
-                                elif (day + 1 % 7 == 1):
-                                    self.mondayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')
-
-                                elif (day + 1 % 7 == 2):
-                                    self.tuesdayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')
-
-                                elif (day + 1 % 7 == 3):
-                                    self.wednesdayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')
-
-                                elif (day + 1 % 7 == 4):
-                                    self.thursdayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')
-
-                                elif (day + 1 % 7 == 5):
-                                    self.fridayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')    
-
-                                elif (day + 1 % 7 == 6):
-                                    self.saturdayImg = str('imgs/' + weeks[currWeek][day][game].team1.name + '.png')    
-
-            self.ids.MainCalendar.ids.Sunday.ids.CalendarLogo.source = self.sundayImg
-            self.ids.MainCalendar.ids.Monday.ids.CalendarLogo.source = str(self.mondayImg)
-            self.ids.MainCalendar.ids.Tuesday.ids.CalendarLogo.source = str(self.tuesdayImg)
-            self.ids.MainCalendar.ids.Wednesday.ids.CalendarLogo.source = str(self.wednesdayImg)
-            self.ids.MainCalendar.ids.Thursday.ids.CalendarLogo.source = str(self.thursdayImg)
-            self.ids.MainCalendar.ids.Friday.ids.CalendarLogo.source = str(self.fridayImg)
-            self.ids.MainCalendar.ids.Saturday.ids.CalendarLogo.source = str(self.saturdayImg)
-
-        except IndexError:
-            print("Regular season finished!")
-            finishedRegularSeason = True
+                        elif (currGame.team2.name == currTeam):
+                            self.weeklyImagesList[day + 1] = str('imgs/' + currGame.team1.name + '.png')
+            
+        for dayOfWeek in range(len(self.calendarComponentsList)):
+            self.calendarComponentsList[dayOfWeek].ids.CalendarLogo.source = self.weeklyImagesList[dayOfWeek]
 
 class ChooseTeamScreen(Screen):
     def __init__(self, **kwargs):

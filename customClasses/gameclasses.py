@@ -1,5 +1,4 @@
 import random
-from time import sleep
 class Game:
     def __init__(self, team1, team2, day, team1Score=0, team2Score=0, wasOvertime=False):
         self.team1 = team1
