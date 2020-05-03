@@ -746,9 +746,11 @@ class TeamHomeScreen(Screen):
 
     def stopSimulation(self):
         self.simulationIsStopped = True
+        print("stopped sim")
         
     def runSimulation(self):
         self.simulationIsStopped = False
+        print("started sim")
         Clock.schedule_interval(self.simulate, self.simSpeed)
         
     def updateRecord(self):
@@ -763,16 +765,15 @@ class TeamHomeScreen(Screen):
         self.ids.CurrTeamRecord.text = recordString
 
     def simulate(self, dt):
-        global weeks, simScreenWasSwitched, finishedRegularSeason, dayStopped, gameStopped, seasonSchedule
+        global weeks, finishedRegularSeason
         if (not self.simulationIsStopped) and (not finishedRegularSeason):
+            global simScreenWasSwitched, dayStopped, gameStopped, seasonSchedule
             if (simScreenWasSwitched):
                 self.day = dayStopped
                 self.game = gameStopped
                 simScreenWasSwitched = False
 
             currGame = seasonSchedule[self.day][self.game]
-
-            print(self.day)
 
             currGame.simulateGame()
             if (currGame.winner.name == currTeam or currGame.loser.name == currTeam):
@@ -809,8 +810,6 @@ class TeamHomeScreen(Screen):
                 self.game = 0
                 self.day += 1
 
-        else:
-            finishedRegularSeason = True
 
     def separateIntoWeeks(self, stageToSeparate):
         global weeks, seasonSchedule, finishedRegularSeason
