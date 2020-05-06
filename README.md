@@ -17,7 +17,7 @@ Optionally, create a Virtual Environment by first installing virtualenv with pip
 4. Everything is now installed. You are now ready to use the Simulation!
 
 ## Usage
-1. Run the scraper.py file by going into the directory the Simulation is installed in and using the command
+1. Run the scraper.py file by going into the directory the Simulation is installed in and using the command:  
 `$ python scraper.py`
 This will create the information.json file required for the engine to get all of the information about the players.
 
