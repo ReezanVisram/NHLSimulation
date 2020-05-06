@@ -5,10 +5,7 @@ class Team:
         self.conference = conference
         self.divison = division
         self.points = 0
-        self.round1Wins = 0
-        self.round2Wins = 0
-        self.round3Wins = 0
-        self.round4Wins = 0
+        self.currPlayoffRoundWins = 0
         self.wins = 0
         self.losses = 0
         self.overtimeLosses = 0
@@ -157,6 +154,9 @@ class Player:
         self.currSeasonPoints = currSeasonPoints
         self.currSeasonGamesPlayed = currSeasonGamesPlayed
 
+    def getCurrYearStats(self):
+        self.currSeasonPoints = self.currSeasonGoals + self.currSeasonAssists
+
 class Goalie:
     def __init__(self, teamName, playerName, position, gamesPlayed, wins, losses, savePercentage, goalsAgainstAverage, overall, currSeasonGamesPlayed=0, currSeasonWins=0, currSeasonSavePercentage=0, currSeasonGoalsAgainstAverage=0):
         self.teamName = teamName
@@ -172,5 +172,12 @@ class Goalie:
         self.currSeasonWins = currSeasonWins
         self.currSeasonSavePercentage = currSeasonSavePercentage
         self.currSeasonGoalsAgainstAverage = currSeasonGoalsAgainstAverage
+        self.totalShotsFaced = 0
+        self.totalSavesMade = 0
+        self.totalGoalsAgainst = 0
+
+    def getCurrYearStats(self):
+        self.currSeasonSavePercentage = round(self.totalSavesMade / self.totalShotsFaced, 3) if self.totalShotsFaced > 0 else 0
+        self.currSeasonGoalsAgainstAverage = round(self.totalGoalsAgainst / self.currSeasonGamesPlayed, 3) if self.currSeasonGamesPlayed > 0 else 0
 
    

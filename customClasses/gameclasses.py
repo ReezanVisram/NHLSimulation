@@ -55,13 +55,13 @@ class Game:
         if (self.wasOvertime):
             self.loser.points += 1
 
-
-
         for player in self.team1.roster:
             player.currSeasonGamesPlayed += 1
 
         for player in self.team2.roster:
             player.currSeasonGamesPlayed += 1
+
+        self.winner.goalieLines[0].currSeasonWins += 1
 
     def determineLoser(self):
         if (self.winner == self.team1):
@@ -209,7 +209,53 @@ class Game:
                         
                         else:
                             self.team2ActualForwardLine[random.randint(0, 2)].currSeasonGoals += 1
+
+                    lowerTeam.goalieLines[0].totalGoalsAgainst += 1
+
+                    numAssists = random.randint(0, 3) 
+
+                    if (numAssists == 0):
+                        pass
+
+                    elif (numAssists == 1):
+                        if (random.randint(0, 1) == 0):
+                            if (higherTeam == self.team1):
+                                self.team1ActualDefenseLine[random.randint(0, 1)].currSeasonAssists += 1
+
+                            else:
+                                self.team2ActualDefenseLine[random.randint(0, 1)].currSeasonAssists += 1
+
+                        else:
+
+                            if (higherTeam == self.team1):
+                                self.team1ActualForwardLine[random.randint(0, 2)].currSeasonAssists += 1
+                            else:
+                                self.team2ActualForwardLine[random.randint(0, 2)].currSeasonAssists += 1
+                    
+                    else:
+                        if (random.randint(0, 1) == 0):
+                            if (higherTeam == self.team1):
+                                self.team1ActualDefenseLine[0].currSeasonAssists += 1
+                                self.team1ActualDefenseLine[1].currSeasonAssists += 1
+
+                            else:
+                                self.team2ActualDefenseLine[0].currSeasonAssists += 1
+                                self.team2ActualDefenseLine[1].currSeasonAssists += 1
+
+                        else:
+                            if (higherTeam == self.team1):
+                                self.team1ActualForwardLine[2].currSeasonAssists += 1
+                                self.team1ActualForwardLine[random.randint(0, 1)].currSeasonAssists += 1
+                            else:
+                                self.team2ActualForwardLine[2].currSeasonAssists += 1
+                                self.team2ActualForwardLine[random.randint(0, 1)].currSeasonAssists += 1
+
+                    lowerTeam.goalieLines[0].totalShotsFaced += 1
                     return higherTeam
+
+                else:
+                    lowerTeam.goalieLines[0].totalShotsFaced += 1
+                    lowerTeam.goalieLines[0].totalSavesMade += 1
 
 # Extends Game class
 class PlayoffGame(Game):
@@ -224,6 +270,7 @@ class PlayoffGame(Game):
             self.winner = self.team2
 
         else:
+            self.wasOvertime = True
             for overtime in range(6):
                 self.simulateOvertime()
 
@@ -237,6 +284,14 @@ class PlayoffGame(Game):
                     
                 else:
                     self.winner = self.team1 if random.randint(0, 1) == 0 else self.team2
+
+        if (self.wasOvertime):
+            if (self.winner == self.team1):
+                self.team1Score += 1
+            else:
+                self.team2Score += 1
+
+        self.determineLoser()
 
 class Series:
     def __init__(self, games, team1Wins=0, team2Wins=0):
