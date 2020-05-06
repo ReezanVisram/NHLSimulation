@@ -1308,6 +1308,8 @@ class LeagueStandingsScreen(Screen):
 
 class NHLSimulationApp(App):
     def build(self):
+        self.icon = 'imgs/nhlshield.png'
+        print(self.get_application_icon())
         return Manager()
 
 if __name__ == '__main__':
