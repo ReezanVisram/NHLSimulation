@@ -2,7 +2,8 @@
 
 ## Installation
 1. Clone this repository into a directory using
-`$ git clone --recursive https://github.com/ReezanVisram/NHLSimulation.git`
+`$ git clone --recursive https://github.com/ReezanVisram/NHLSimulation.git`   
+**OR** Click the Download Zip button and extract the .zip into an empty directory
 
 2. Ensure you have the latest version of both Python and Pip Package Manager installed.
 Install the latest version of Pip using
