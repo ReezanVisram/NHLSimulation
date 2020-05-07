@@ -602,10 +602,12 @@ dayStopped = 0
 gameStopped = 0
 finishedRegularSeason = False
 simScreenWasSwitched = False
+firstEntry = True
 
 seasonSchedule = createSchedule(atlanticTeams, metroTeams, centralTeams, pacificTeams)
 
 finishedCurrRound = False
+returnedFalse = False
 
 finishedRound1 = False
 finishedRound2 = False
@@ -649,6 +651,7 @@ class AdditionalInformationScreen(Screen):
 class TeamHomeScreen(Screen):
     @mainthread
     def on_enter(self):
+        global finishedCurrRound, firstEntry
         self.ids.TeamHomeScreenTitle.text = currTeam
         self.ids.TeamHomeScreenLogo.source = str('imgs/' + currTeam + '.png')
         
@@ -673,24 +676,26 @@ class TeamHomeScreen(Screen):
             'imgs/white.png'
         ]
 
+        if (firstEntry):
+            self.playoffRoundVisuals = []
 
+        finishedCurrRound = False
         self.simSpeed = 0.2
         self.game = gameStopped
         self.day = dayStopped
         self.weekHasChanged = False
         self.simulationIsStopped = True
-        self.currWeek = currWeek
         self.isInPlayoffs = False
         self.inNextRound = False
 
-
-        self.separateIntoWeeks(seasonSchedule)
-        self.updateRecord()
-
-        self.playoffRoundVisuals = []
-
         if (not finishedRegularSeason):
+            self.separateIntoWeeks(seasonSchedule)
+            self.currWeek = currWeek
             self.populateWeek(self.currWeek)
+            self.updateRecord()
+        
+        firstEntry = False
+
 
     def on_leave(self):
         global currWeek, simScreenWasSwitched, dayStopped, gameStopped
@@ -711,7 +716,7 @@ class TeamHomeScreen(Screen):
         self.simulationIsStopped = True
         
     def runSimulation(self):
-        global weeks, initializedRound1, finishedCurrRound, initializedRound2, initializedRound3, initializedRound4
+        global weeks, initializedRound1, finishedRound1, finishedRound2, finishedRound3, finishedRound4, finishedCurrRound, initializedRound2, initializedRound3, initializedRound4
         self.simulationIsStopped = False
         if (not finishedRegularSeason):
             Clock.schedule_interval(self.simulateRegularSeason, self.simSpeed)
@@ -730,8 +735,8 @@ class TeamHomeScreen(Screen):
 
                 initializedRound1 = True
 
-            if (initializedRound1) and (not finishedCurrRound) and (not finishedRound1):
-                Clock.schedule_interval(partial(self.simulateRound, self.round1), self.simSpeed)
+            if (initializedRound1) and (not finishedRound1):
+                self.roundEvent = Clock.schedule_interval(partial(self.simulateRound, 1, self.round1), self.simSpeed)
 
             else:
                 if (not initializedRound2) and (finishedRound1):
@@ -757,66 +762,66 @@ class TeamHomeScreen(Screen):
 
                     initializedRound2 = True
 
-            if (initializedRound2) and (not finishedCurrRound) and (not finishedRound2):
-                Clock.schedule_interval(partial(self.simulateRound, self.round2), self.simSpeed)
+                if (initializedRound2) and (not finishedRound2):
+                   self.roundEvent =  Clock.schedule_interval(partial(self.simulateRound, 2, self.round2), self.simSpeed)
             
-            else:
-                if (not initializedRound3) and (finishedRound2):
-                    self.round3 = generateRound3(currRoundEasternWinners, currRoundWesternWinners)
-                    for team in currRoundEasternWinners:
-                        team.currPlayoffRoundWins = 0
+                else:
+                    if (not initializedRound3) and (finishedRound2):
+                        self.round3 = generateRound3(currRoundEasternWinners, currRoundWesternWinners)
+                        for team in currRoundEasternWinners:
+                            team.currPlayoffRoundWins = 0
 
-                    for team in currRoundWesternWinners:
-                        team.currPlayoffRoundWins = 0
+                        for team in currRoundWesternWinners:
+                            team.currPlayoffRoundWins = 0
 
-                    currRoundWinners.clear()
-                    currRoundEasternWinners.clear()
-                    currRoundWesternWinners.clear()
-                    weeks.clear()
-                    self.day = 0
-                    self.game = 0
-                    self.currWeek = 0
-                    self.simSpeed = 0.7
-                    finishedCurrRound = False
+                        currRoundWinners.clear()
+                        currRoundEasternWinners.clear()
+                        currRoundWesternWinners.clear()
+                        weeks.clear()
+                        self.day = 0
+                        self.game = 0
+                        self.currWeek = 0
+                        self.simSpeed = 0.7
+                        finishedCurrRound = False
 
-                    self.separateIntoWeeks(self.round3)
-                    self.populateWeek(self.currWeek)
+                        self.separateIntoWeeks(self.round3)
+                        self.populateWeek(self.currWeek)
 
-                    initializedRound3 = True
+                        initializedRound3 = True
 
-            if (initializedRound3) and (not finishedCurrRound) and (not finishedRound3):
-                Clock.schedule_interval(partial(self.simulateRound, self.round3), self.simSpeed)
+                if (initializedRound3) and (not finishedRound3):
+                    self.roundEvent = Clock.schedule_interval(partial(self.simulateRound, 3, self.round3), self.simSpeed)
 
-            else:
-                if (not initializedRound4) and (finishedRound3):
-                    self.round4 = generateStanleyCupFinals(currRoundEasternWinners, currRoundWesternWinners)
-                    for team in currRoundEasternWinners:
-                        team.currPlayoffRoundWins = 0
+                else:
+                    if (not initializedRound4) and (finishedRound3):
+                        self.round4 = generateStanleyCupFinals(currRoundEasternWinners, currRoundWesternWinners)
+                        for team in currRoundEasternWinners:
+                            team.currPlayoffRoundWins = 0
 
-                    for team in currRoundWesternWinners:
-                        team.currPlayoffRoundWins = 0
+                        for team in currRoundWesternWinners:
+                            team.currPlayoffRoundWins = 0
 
-                    currRoundWinners.clear()
-                    currRoundEasternWinners.clear()
-                    currRoundWesternWinners.clear()
-                    weeks.clear()
-                    self.day = 0
-                    self.game = 0
-                    self.currWeek = 0
-                    self.simSpeed = 1.0
-                    finishedCurrRound = False
+                        currRoundWinners.clear()
+                        currRoundEasternWinners.clear()
+                        currRoundWesternWinners.clear()
+                        weeks.clear()
+                        self.day = 0
+                        self.game = 0
+                        self.currWeek = 0
+                        self.simSpeed = 1.0
+                        finishedCurrRound = False
 
-                    self.separateIntoWeeks(self.round4)
-                    self.populateWeek(self.currWeek)
+                        self.separateIntoWeeks(self.round4)
+                        self.populateWeek(self.currWeek)
 
-                    initializedRound4 = True
+                        initializedRound4 = True
 
-            if (initializedRound4) and (not finishedCurrRound) and (not finishedRound4):
-                Clock.schedule_interval(partial(self.simulateRound, self.round4), self.simSpeed)
+                    if (initializedRound4) and (not finishedRound4):
+                       self.roundEvent =  Clock.schedule_interval(partial(self.simulateRound, 4, self.round4), self.simSpeed)
             
-            else:
-                if (finishedRound4):
-                    self.ids.LatestGameResult.text = 'The {} are your Stanley Cup Champions!'.format(currRoundWinners[0].name)
+                    else:
+                        if (finishedRound4):
+                            self.ids.LatestGameResult.text = 'The {} are your Stanley Cup Champions!'.format(currRoundWinners[0].name)
 
     def updateRecord(self):
         for team in teams:
@@ -845,6 +850,8 @@ class TeamHomeScreen(Screen):
             except:
                 if (self.day > len(seasonSchedule) - 1):
                     finishedRegularSeason = True
+                    for dayOfWeek in range(len(self.calendarComponentsList)):
+                        self.calendarComponentsList[dayOfWeek].ids.CalendarLogo.source = 'imgs/gray.png'
 
                 else:
                     self.day += 1
@@ -887,9 +894,10 @@ class TeamHomeScreen(Screen):
                 self.calendarComponentsList[self.day % 7].ids.CalendarLogo.source = 'imgs/gray.png'
 
             else:
+                self.ids.LatestGameResult.text = 'Finished Regular Season. Press Start for Playoffs'
                 return False
 
-    def simulateRound(self, currRound, dt):
+    def simulateRound(self, roundNum, currRound, dt):
         global roundsPlayed, finishedRound1, finishedRound2, finishedRound3, finishedRound4, finishedCurrRound, currRoundWinners, currRoundEasternWinners, currRoundWesternWinners
         if (not self.simulationIsStopped):
             global simScreenWasSwitched, dayStopped, gameStopped
@@ -897,6 +905,7 @@ class TeamHomeScreen(Screen):
             if (simScreenWasSwitched):
                 self.day = dayStopped
                 self.game = gameStopped
+                finishedCurrRound = False
                 simScreenWasSwitched = False
 
             try:
@@ -958,24 +967,24 @@ class TeamHomeScreen(Screen):
                     else:
                         currRoundWesternWinners.append(team)
 
-                finishedCurrRound = True
-
-                roundsPlayed += 1
-
-                if (roundsPlayed == 1):
+                if (roundNum == 1):
                     finishedRound1 = True
+                    self.ids.LatestGameResult.text = 'Finished Current Round. Press Start for Next Round'
                 
-                elif (roundsPlayed == 2):
+                elif (roundNum == 2):
                     finishedRound2 = True
+                    self.ids.LatestGameResult.text = 'Finished Current Round. Press Start for Next Round'
 
-                elif (roundsPlayed == 3):
+                elif (roundNum == 3):
                     finishedRound3 = True
+                    self.ids.LatestGameResult.text = 'Finished Current Round. Press Start for Next Round'
                 
-                elif (roundsPlayed == 4):
+                elif (roundNum == 4):
                     finishedRound4 = True
                     self.ids.LatestGameResult.text = 'The {} are your Stanley Cup Champions!'.format(currRoundWinners[0].name)
                 
                 return False
+
 
     def separateIntoWeeks(self, stageToSeparate):
         global weeks, seasonSchedule, finishedRegularSeason
@@ -1309,7 +1318,6 @@ class LeagueStandingsScreen(Screen):
 class NHLSimulationApp(App):
     def build(self):
         self.icon = 'imgs/nhlshield.png'
-        print(self.get_application_icon())
         return Manager()
 
 if __name__ == '__main__':
