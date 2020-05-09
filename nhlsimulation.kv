@@ -99,6 +99,8 @@
 
     LeagueStandingsScreen:
 
+    ScrapeScreen:
+
 <MainMenuScreen>:
     name: "MainMenuScreen"
 
@@ -131,13 +133,59 @@
         Button:
             text: "About"
             size_hint: 0.4, 0.1
-            pos_hint: {"x": 0.3, "top": 0.35}
+            pos_hint: {"x": 0.3, "top": 0.4}
             on_press: root.manager.current = 'AboutScreen'
+
+        Button:
+            text: "Update Rosters"
+            size_hint: 0.4, 0.1
+            pos_hint: {"x": 0.3, "top": 0.3}
+            on_press: root.manager.current = 'ScrapeScreen'
 
         Button:
             text: "Quit"
             size_hint: 0.4, 0.1
             pos_hint: {"x": 0.3, "top": 0.2}
+
+<ScrapeScreen>:
+    name: "ScrapeScreen"
+
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: "Update Rosters"
+            color: [0, 0, 0, 1]
+            font_size: 40
+            pos_hint: {"top": 1.4}
+
+        Label:
+            text: "The application will freeze during the duration of the update, please be patient."
+            color: [0, 0, 0, 1]
+            font_size: 20
+            pos_hint: {"top": 1.2}
+
+        Button:
+            text: "Begin Update"
+            on_press: root.scrape()
+            size_hint: 0.3, 0.1
+            pos_hint: {"x": 0.35, "top": 0.3}
+
+        Button:
+            text: "Back to Main Menu"
+            on_press: root.manager.current = "MainMenuScreen"
+            size_hint: 0.3, 0.1
+
+        ProgressBar:
+            id: ScrapeProgress
+            size_hint_x: 0.8
+            pos_hint: {"x": 0.1}
+            max: 31
 
 <AboutScreen>:
     name: "AboutScreen"
@@ -152,7 +200,6 @@
         Label:
             text: "The rights to all players and teams, along with their likenesses and logos belong to the National Hockey League and National Hockey League Players Association."
             text_size: self.size
-            pos_hint: {"top": -0.5}
             color: [0, 0, 0, 1]
 
         Button:

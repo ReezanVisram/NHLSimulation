@@ -1,20 +1,31 @@
 import json
 import random
 from functools import partial
-from customClasses.playerclasses import Team, Player, Goalie
-from customClasses.gameclasses import Game, PlayoffGame, Series
+
+try:
+    from customClasses.playerclasses import Team, Player, Goalie
+    from customClasses.gameclasses import Game, PlayoffGame, Series
+
+except AttributeError:
+    pass
+
 from time import sleep
 from kivy.core.window import Window
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.progressbar import ProgressBar
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
 from kivy.uix.image import Image
 from kivy.uix.gridlayout import GridLayout
 from kivy.clock import mainthread, Clock
 from kivy.graphics import *
+import requests
+
+teamVal = 1
+
 
 
 # These lists are defined at the top following the style of my codebase, but are not used until far later.
@@ -440,7 +451,7 @@ def getPlayoffTeams(atlantic, metro, central, pacific, eastern, western):
                 break
 
 # Creates all of the actual lists of teams and players
-with open('information.json') as inputFile:
+with open('json/information.json') as inputFile:
     data = json.load(inputFile)
     teamNames = getTeamNames(data)
     teamConferences = getTeamConferences(data)
@@ -642,6 +653,7 @@ class Manager(ScreenManager):
 class MainMenuScreen(Screen):
     pass
 
+
 class AboutScreen(Screen):
     pass
 
@@ -680,7 +692,7 @@ class TeamHomeScreen(Screen):
             self.playoffRoundVisuals = []
 
         finishedCurrRound = False
-        self.simSpeed = 0.2
+        self.simSpeed = 0.01
         self.game = gameStopped
         self.day = dayStopped
         self.weekHasChanged = False
@@ -895,6 +907,9 @@ class TeamHomeScreen(Screen):
 
             else:
                 self.ids.LatestGameResult.text = 'Finished Regular Season. Press Start for Playoffs'
+                self.day = 0
+                self.game = 0
+                self.currWeek = 0
                 return False
 
     def simulateRound(self, roundNum, currRound, dt):
@@ -983,6 +998,9 @@ class TeamHomeScreen(Screen):
                     finishedRound4 = True
                     self.ids.LatestGameResult.text = 'The {} are your Stanley Cup Champions!'.format(currRoundWinners[0].name)
                 
+                self.day = 0
+                self.game = 0
+                self.currWeek = 0
                 return False
 
 
@@ -1314,6 +1332,69 @@ class LeagueStandingsScreen(Screen):
             self.currConference = 0
 
         self.populateConference()
+
+class ScrapeScreen(Screen):
+    def scrape(self):
+        print("Starting Scrape")
+        teamVal = 1
+        allTeams = requests.get('https://statsapi.web.nhl.com/api/v1/teams')
+        allTeamsRawJson = allTeams.json()
+
+        teamAndPlayerData = {
+            'teams': [{ 'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}] }, {'roster': [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]}]
+        }
+
+        for i in range(len(teamAndPlayerData['teams'])):
+            
+            if ('Canadiens' in allTeamsRawJson["teams"][i]["name"]):
+                teamAndPlayerData['teams'][i]['teamName'] = 'Montreal Canadiens'
+            else:
+                teamAndPlayerData['teams'][i]['teamName'] = allTeamsRawJson["teams"][i]["name"]
+                
+            teamAndPlayerData['teams'][i]['conference'] = allTeamsRawJson["teams"][i]["conference"]["name"]
+            teamAndPlayerData['teams'][i]['division'] = allTeamsRawJson["teams"][i]["division"]["name"]
+            currTeamLink = allTeamsRawJson["teams"][i]["link"]
+
+            individualTeam = requests.get('https://statsapi.web.nhl.com/' + currTeamLink + '/roster')
+            individualTeamRawJson = individualTeam.json()
+
+
+            for j in range(len(individualTeamRawJson["roster"])):
+                currPlayerLink = individualTeamRawJson["roster"][j]["person"]["link"]
+                teamAndPlayerData['teams'][i]['roster'][j]['playerName'] = individualTeamRawJson["roster"][j]["person"]["fullName"]
+                teamAndPlayerData['teams'][i]['roster'][j]['playerPosition'] = individualTeamRawJson["roster"][j]["position"]["abbreviation"]
+
+                individualPlayerLink = requests.get('https://statsapi.web.nhl.com/' + currPlayerLink + '/stats?stats=statsSingleSeason&season=20192020')
+                individualPlayerRawJson = individualPlayerLink.json()
+
+                teamAndPlayerData['teams'][i]['roster'][j]['stats'] = {}
+
+                try:
+                    currPlayerStats = individualPlayerRawJson["stats"][0]["splits"][0]["stat"]
+                except:
+                    currPlayerStats = -1
+
+                finally:
+                    try:
+                        if (currPlayerStats != -1):
+                            teamAndPlayerData['teams'][i]['roster'][j]['stats']['gamesPlayed'] = currPlayerStats['games']
+                            teamAndPlayerData['teams'][i]['roster'][j]['stats']['goals'] = currPlayerStats['goals']
+                            teamAndPlayerData['teams'][i]['roster'][j]['stats']['assists'] = currPlayerStats['assists']
+                            teamAndPlayerData['teams'][i]['roster'][j]['stats']['points'] = currPlayerStats['points']
+                            teamAndPlayerData['teams'][i]['roster'][j]['stats']['plusMinus'] = currPlayerStats['plusMinus']
+                            teamAndPlayerData['teams'][i]['roster'][j]['stats']['timeOnIcePerGame'] = currPlayerStats['timeOnIcePerGame']
+
+                    except:
+                        if (currPlayerStats != -1):
+                            teamAndPlayerData['teams'][i]['roster'][j]['stats']['gamesPlayed'] = currPlayerStats['gamesStarted']
+                            teamAndPlayerData['teams'][i]['roster'][j]['stats']['wins'] = currPlayerStats['wins']
+                            teamAndPlayerData['teams'][i]['roster'][j]['stats']['losses'] = currPlayerStats['losses']
+                            teamAndPlayerData['teams'][i]['roster'][j]['stats']['savePercentage'] = currPlayerStats['savePercentage']
+                            teamAndPlayerData['teams'][i]['roster'][j]['stats']['goalsAgainstAverage'] = currPlayerStats['goalAgainstAverage']
+
+        with open('json/information.json', 'w') as outputFile:
+            outputFile.truncate(0)
+            json.dump(teamAndPlayerData, outputFile)
 
 class NHLSimulationApp(App):
     def build(self):
